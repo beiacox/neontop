@@ -1,0 +1,62 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "NeonTop",
+  "version": "0.13.0",
+  "identifier": "com.neontop.app",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "NeonTop",
+        "width": 1480,
+        "minWidth": 420,
+        "minHeight": 560,
+        "height": 940,
+        "visible": false,
+        "decorations": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "appimage",
+      "deb",
+      "rpm"
+    ],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "category": "Utility",
+    "shortDescription": "Monitor de recursos del sistema con estética neón",
+    "longDescription": "NeonTop muestra CPU, memoria, red, procesos, discos, sensores y GPU (AMD, NVIDIA e Intel) con gráficas en tiempo real, al estilo de btop pero como aplicación de escritorio.",
+    "linux": {
+      "deb": {
+        "depends": [
+          "libwebkit2gtk-4.1-0",
+          "libayatana-appindicator3-1"
+        ]
+      },
+      "rpm": {
+        "depends": [
+          "webkit2gtk4.1",
+          "libayatana-appindicator-gtk3"
+        ]
+      }
+    }
+  },
+  "mainBinaryName": "neontop"
+}

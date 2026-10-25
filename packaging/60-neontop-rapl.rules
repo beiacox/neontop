@@ -1,0 +1,4 @@
+# NeonTop: permite a los usuarios leer los contadores de energía RAPL (consumo de CPU y RAM).
+# Por defecto solo root puede leerlos (mitigación de PLATYPUS, CVE-2020-8694).
+# Para revertirlo, borra este fichero y reinicia.
+ACTION=="add", SUBSYSTEM=="powercap", KERNEL=="intel-rapl:*", RUN+="/usr/bin/chmod o+r /sys%p/energy_uj"

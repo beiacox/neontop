@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=NeonTop
+GenericName=Monitor del sistema
+Comment=Monitor de recursos del sistema con estética neón
+Exec=neontop
+Icon=neontop
+Terminal=false
+Categories=System;Monitor;Utility;
+Keywords=monitor;cpu;memoria;gpu;procesos;btop;top;sensores;
+StartupWMClass=neontop

@@ -1,0 +1,28 @@
+#!/bin/sh
+# NeonTop FPS: lanza un programa con la medición de FPS activada.
+# En Steam, opciones de lanzamiento:  neontop-fps %command%
+# Combinable con otros lanzadores:    neontop-fps gamemoderun mangohud %command%
+if [ "$#" -eq 0 ]; then
+    echo "Uso: neontop-fps <programa> [argumentos…]" >&2
+    exit 1
+fi
+export NEONTOP_FPS=1
+
+# Proton / Wine / Steam Linux Runtime: el juego dibuja con Vulkan (DXVK, VKD3D) y lo mide la capa
+# Vulkan implícita. No se usa LD_PRELOAD: %command% es toda la cadena de Steam (steam-launch-wrapper,
+# reaper, pressure-vessel, Proton…) y la precarga la heredarían procesos que no son el juego.
+proton=0
+[ -n "$STEAM_COMPAT_DATA_PATH$STEAM_COMPAT_CLIENT_INSTALL_PATH$WINEPREFIX" ] && proton=1
+for a in "$@"; do
+    case "$a" in
+        *proton* | *Proton* | *SteamLinuxRuntime* | *_v2-entry-point* | *wine* | *.exe | *.EXE) proton=1 ;;
+    esac
+done
+
+if [ "$proton" = 0 ]; then
+    # OpenGL nativo: precarga. $LIB lo expande el cargador a lib o lib32 según el programa sea de
+    # 64 o 32 bits. Va la primera para ver las llamadas antes que otras precargas (MangoHud, overlay
+    # de Steam), que la librería después les pasa.
+    export LD_PRELOAD="/usr/\$LIB/neontop/libneontop_gl.so${LD_PRELOAD:+:$LD_PRELOAD}"
+fi
+exec "$@"

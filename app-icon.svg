@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a0f3d"/>
+      <stop offset="1" stop-color="#07060d"/>
+    </linearGradient>
+    <linearGradient id="line" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff2bd6"/>
+      <stop offset="1" stop-color="#00f0ff"/>
+    </linearGradient>
+    <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#00f0ff" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#ff2bd6" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="plate">
+      <path d="M150 64 H874 L960 150 V874 L874 960 H150 L64 874 V150 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- placa con esquinas cortadas, como los paneles de la app -->
+  <path d="M150 64 H874 L960 150 V874 L874 960 H150 L64 874 V150 Z" fill="url(#bg)"/>
+  <g clip-path="url(#plate)" stroke="#00f0ff" stroke-opacity="0.08" stroke-width="4">
+    <path d="M64 256 H960 M64 448 H960 M64 640 H960 M64 832 H960 M256 64 V960 M448 64 V960 M640 64 V960 M832 64 V960"/>
+  </g>
+
+  <!-- gráfica de actividad -->
+  <path clip-path="url(#plate)" d="M64 700 L220 700 L300 520 L380 610 L470 300 L560 560 L640 470 L720 540 L800 250 L880 380 L960 330 V960 H64 Z" fill="url(#fill)"/>
+  <path d="M110 700 L220 700 L300 520 L380 610 L470 300 L560 560 L640 470 L720 540 L800 250 L880 380 L920 350"
+        fill="none" stroke="url(#line)" stroke-width="44" stroke-linejoin="round" stroke-linecap="round" filter="url(#glow)"/>
+
+  <!-- borde neón -->
+  <path d="M150 64 H874 L960 150 V874 L874 960 H150 L64 874 V150 Z" fill="none" stroke="#00f0ff" stroke-width="20" filter="url(#glow)"/>
+  <path d="M874 64 L960 150" stroke="#ff2bd6" stroke-width="26" stroke-linecap="round" filter="url(#glow)"/>
+  <path d="M64 874 L150 960" stroke="#ff2bd6" stroke-width="26" stroke-linecap="round" filter="url(#glow)"/>
+</svg>

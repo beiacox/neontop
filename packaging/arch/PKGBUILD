@@ -1,0 +1,91 @@
+# Paquete local para Arch / CachyOS, compilado desde esta copia del código.
+# Genera dos paquetes (instalar solo uno, se excluyen entre sí):
+#   neontop         → x86-64 genérico: funciona en cualquier PC de 64 bits.
+#   neontop-native  → optimizado para la CPU de la máquina donde se compila
+#                     (-march/target-cpu=native). En otras CPUs puede dar SIGILL.
+# Uso:  cd packaging/arch && makepkg -f
+#       sudo pacman -U neontop-<ver>-x86_64.pkg.tar.zst          (general)
+#       sudo pacman -U neontop-native-<ver>-x86_64.pkg.tar.zst   (nativo)
+pkgbase=neontop
+pkgname=('neontop' 'neontop-native')
+pkgver=0.13.0
+pkgrel=1
+pkgdesc="Monitor de recursos del sistema con estética neón (CPU, memoria, red, procesos, discos, sensores, GPU, energía y FPS de juegos)"
+arch=('x86_64')
+license=('MIT')
+depends=('webkit2gtk-4.1' 'gtk3' 'libayatana-appindicator' 'hwdata' 'polkit' 'libcap')
+optdepends=(
+  'apcupsd: consumo total del puesto con un SAI APC'
+  'nvidia-utils: métricas de GPUs NVIDIA (NVML)'
+  'lm_sensors: detectar sensores de placa base (sensors-detect)'
+  'vulkan-icd-loader: medir FPS en juegos Vulkan / Proton'
+)
+makedepends=('rust' 'cargo' 'nodejs' 'npm' 'vulkan-headers' 'lib32-glibc' 'lib32-gcc-libs')
+options=('!lto')
+
+_src="$startdir/../.."
+
+# makepkg (sobre todo en CachyOS) ya trae -march/target-cpu=native en sus flags;
+# aquí se fijan explícitamente para cada variante.
+_build_variant() { # $1 = directorio de salida, $2 = cpu de Rust, $3 = -march de C
+  export CARGO_TARGET_DIR="$_src/src-tauri/target/pkg-$1"
+  export RUSTFLAGS="-C opt-level=3 -C target-cpu=$2"
+  export CFLAGS="-march=$3 -mtune=${4:-generic} -O2 -pipe -fno-plt"
+  export CXXFLAGS="$CFLAGS"
+  npm run tauri build -- --no-bundle
+}
+
+build() {
+  cd "$_src"
+  # capa de FPS para juegos (C, 64 y 32 bits); usa sus propios flags, ver packaging/layer/Makefile
+  make -C packaging/layer clean
+  make -C packaging/layer all
+  # lector de los contadores de tráfico de la RAM (recibe CAP_PERFMON si el usuario lo activa)
+  # x86-64 genérico: va en ambos paquetes (makepkg trae target-cpu=native en CachyOS)
+  RUSTFLAGS="-C target-cpu=x86-64" cargo build --release --manifest-path packaging/membw/Cargo.toml --target-dir "$_src/packaging/membw/target"
+  npm ci
+  # npm a veces omite el binario opcional de la CLI de Tauri para Linux (dependencia opcional
+  # filtrada por libc): si falta, se instala explícitamente con la versión del lockfile
+  if [ ! -d node_modules/@tauri-apps/cli-linux-x64-gnu ]; then
+    npm install --no-save "@tauri-apps/cli-linux-x64-gnu@$(node -p "require('./node_modules/@tauri-apps/cli/package.json').version")"
+  fi
+  _build_variant generic x86-64 x86-64 generic
+  _build_variant native native native native
+}
+
+_install_common() { # $1 = variante
+  cd "$_src"
+  install -Dm755 "src-tauri/target/pkg-$1/release/neontop" "$pkgdir/usr/bin/neontop"
+  install -Dm644 packaging/neontop.desktop "$pkgdir/usr/share/applications/neontop.desktop"
+  install -Dm644 packaging/60-neontop-rapl.rules "$pkgdir/usr/share/neontop/60-neontop-rapl.rules"
+  # acciones de administrador con pkexec: la contraseña se recuerda unos minutos
+  install -Dm644 packaging/com.neontop.app.policy "$pkgdir/usr/share/polkit-1/actions/com.neontop.app.policy"
+  # medición de FPS: capa Vulkan implícita (solo con NEONTOP_FPS=1), precarga OpenGL y lanzador
+  local L=packaging/layer
+  install -Dm755 $L/build/64/libneontop_layer.so "$pkgdir/usr/lib/neontop/libneontop_layer.so"
+  install -Dm755 $L/build/64/libneontop_gl.so "$pkgdir/usr/lib/neontop/libneontop_gl.so"
+  install -Dm755 $L/build/32/libneontop_layer.so "$pkgdir/usr/lib32/neontop/libneontop_layer.so"
+  install -Dm755 $L/build/32/libneontop_gl.so "$pkgdir/usr/lib32/neontop/libneontop_gl.so"
+  install -Dm644 $L/neontop_fps.x86_64.json "$pkgdir/usr/share/vulkan/implicit_layer.d/neontop_fps.x86_64.json"
+  install -Dm644 $L/neontop_fps.x86.json "$pkgdir/usr/share/vulkan/implicit_layer.d/neontop_fps.x86.json"
+  install -Dm755 $L/neontop-fps "$pkgdir/usr/bin/neontop-fps"
+  install -Dm755 packaging/membw/target/release/neontop-membw "$pkgdir/usr/lib/neontop/neontop-membw"
+  install -Dm644 src-tauri/icons/32x32.png "$pkgdir/usr/share/icons/hicolor/32x32/apps/neontop.png"
+  install -Dm644 src-tauri/icons/128x128.png "$pkgdir/usr/share/icons/hicolor/128x128/apps/neontop.png"
+  install -Dm644 src-tauri/icons/128x128@2x.png "$pkgdir/usr/share/icons/hicolor/256x256/apps/neontop.png"
+  install -Dm644 app-icon.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/neontop.svg"
+}
+
+package_neontop() {
+  install=neontop.install
+  conflicts=('neontop-native')
+  _install_common generic
+}
+
+package_neontop-native() {
+  install=neontop.install
+  pkgdesc+=" — compilado para la CPU de esta máquina"
+  provides=("neontop=$pkgver")
+  conflicts=('neontop')
+  _install_common native
+}

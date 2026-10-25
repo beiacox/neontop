@@ -1,0 +1,20 @@
+# NeonTop: el tráfico de RAM en vivo necesita que /usr/lib/neontop/neontop-membw tenga el
+# permiso CAP_PERFMON. Lo concede el usuario desde la app; al actualizar el paquete el fichero se
+# reemplaza y pierde el permiso, así que se vuelve a aplicar si estaba activado.
+_membw=/usr/lib/neontop/neontop-membw
+_conf=/etc/modules-load.d/neontop-membw.conf
+
+post_install() {
+  if [ -f "$_conf" ] && [ -x "$_membw" ]; then
+    setcap cap_perfmon=ep "$_membw" || true
+  fi
+}
+
+post_upgrade() {
+  post_install
+}
+
+post_remove() {
+  # la configuración la creó NeonTop (al activar la función); sin el programa ya no sirve
+  rm -f "$_conf"
+}

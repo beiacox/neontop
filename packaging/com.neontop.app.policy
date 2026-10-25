@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<!-- Acciones de administrador de NeonTop (señales a procesos de otros usuarios, prioridad,
+     acceso a los contadores de energía RAPL). La contraseña se recuerda unos minutos. -->
+<policyconfig>
+  <vendor>NeonTop</vendor>
+  <action id="com.neontop.app.helper">
+    <description>Acciones de administrador de NeonTop</description>
+    <message>NeonTop necesita permisos de administrador para esta acción</message>
+    <icon_name>neontop</icon_name>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/neontop</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">--helper</annotate>
+  </action>
+</policyconfig>
