@@ -363,8 +363,7 @@ fn tab_hint(id: &str, s: &neontop_core::sampler::Snapshot, m: &neontop_core::mod
 fn window_controls(cx: &mut Context<Root>) -> impl IntoElement {
     let th = Th::get(cx).clone();
     let b = |id: &'static str, s: &'static str, c: Hsla| {
-        div()
-            .id(id)
+        kit::no_drag(div().id(id))
             .w(px(28.))
             .h(px(24.))
             .flex()

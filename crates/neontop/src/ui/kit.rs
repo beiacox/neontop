@@ -10,6 +10,12 @@ use neontop_core::theme::Corners;
 use crate::charts;
 use crate::ui::theme::{fade, Th};
 
+/// Un control que se pulsa: el clic no llega a la cabecera (que arrastra la ventana al
+/// pulsarla; si el arrastre empieza, el control nunca recibe el clic).
+pub fn no_drag<E: InteractiveElement>(e: E) -> E {
+    e.on_mouse_down(gpui::MouseButton::Left, |_, _, cx| cx.stop_propagation())
+}
+
 /// Columnas del diseño actual (las calcula la ventana según su ancho).
 #[derive(Clone, Copy)]
 pub struct Cols(pub usize);
@@ -182,8 +188,7 @@ pub fn stats_row(items: Vec<AnyElement>, cx: &App) -> impl IntoElement {
 /// Botón de texto.
 pub fn button(id: impl Into<ElementId>, label: impl Into<SharedString>, color: Hsla, cx: &App) -> Stateful<gpui::Div> {
     let th = Th::get(cx);
-    div()
-        .id(id)
+    no_drag(div().id(id))
         .flex()
         .items_center()
         .justify_center()
@@ -220,8 +225,7 @@ pub fn segmented<T: Clone + PartialEq + 'static>(
         let on = &val == current;
         let f = on_pick.clone();
         row = row.child(
-            div()
-                .id(SharedString::from(format!("{id}-{i}")))
+            no_drag(div().id(SharedString::from(format!("{id}-{i}"))))
                 .px(px(8.))
                 .py(px(3.))
                 .text_size(px(11.))
@@ -239,8 +243,7 @@ pub fn segmented<T: Clone + PartialEq + 'static>(
 /// Casilla con texto (interruptor).
 pub fn toggle(id: impl Into<ElementId>, on: bool, label: impl Into<SharedString>, cx: &App, f: impl Fn(&ClickEvent, &mut Window, &mut App) + 'static) -> impl IntoElement {
     let th = Th::get(cx).clone();
-    div()
-        .id(id)
+    no_drag(div().id(id))
         .flex()
         .items_center()
         .gap(px(8.))
@@ -274,8 +277,7 @@ pub fn stepper(
 ) -> impl IntoElement {
     let th = Th::get(cx).clone();
     let b = |sid: String, s: &'static str| {
-        div()
-            .id(SharedString::from(sid))
+        no_drag(div().id(SharedString::from(sid)))
             .w(px(20.))
             .h(px(20.))
             .flex()
@@ -345,4 +347,53 @@ pub fn meter_row(label: impl Into<SharedString>, frac: f32, value: impl Into<Sha
 pub fn empty(s: impl Into<SharedString>, cx: &App) -> impl IntoElement {
     let th = Th::get(cx);
     div().py(px(18.)).flex().justify_center().text_size(px(11.5)).text_color(th.muted).child(s.into())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use gpui::{point, Context, Modifiers, TestAppContext};
+
+    /// Imita la cabecera: el contenedor arrastra la ventana al pulsarlo y dentro hay controles.
+    struct Header {
+        dragged: u32,
+        clicked: u32,
+        toggled: u32,
+        picked: u32,
+    }
+
+    impl Render for Header {
+        fn render(&mut self, _w: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+            div()
+                .size_full()
+                .flex()
+                .on_mouse_down(gpui::MouseButton::Left, cx.listener(|this, _, _, _| this.dragged += 1))
+                .child(button("b", "Pulsar", gpui::red(), cx).w(px(100.)).h(px(40.)).on_click(cx.listener(|this, _, _, _| this.clicked += 1)))
+                .child(div().w(px(100.)).h(px(40.)).child(toggle("t", false, "Casilla", cx, cx.listener(|this, _, _, _| this.toggled += 1))))
+                .child(div().w(px(100.)).h(px(40.)).child(segmented("s", vec![(1, "uno".into())], &0, cx, {
+                    let me = cx.entity().downgrade();
+                    move |_, _, cx| {
+                        let _ = me.update(cx, |this, _| this.picked += 1);
+                    }
+                })))
+                .child(div().w(px(100.)).h(px(40.)))
+        }
+    }
+
+    #[gpui::test]
+    fn controls_receive_clicks_inside_the_drag_area(cx: &mut TestAppContext) {
+        cx.update(|cx| cx.set_global(crate::ui::theme::Th::new(neontop_core::theme::resolve("neon", true), true, true)));
+        let (view, cx) = cx.add_window_view(|_, _| Header { dragged: 0, clicked: 0, toggled: 0, picked: 0 });
+        cx.run_until_parked();
+        // botón, casilla y grupo de opciones: el clic llega y la cabecera no empieza a arrastrar
+        cx.simulate_click(point(px(20.), px(20.)), Modifiers::none());
+        cx.simulate_click(point(px(110.), px(8.)), Modifiers::none());
+        cx.simulate_click(point(px(215.), px(8.)), Modifiers::none());
+        // una zona vacía de la cabecera sí arrastra
+        cx.simulate_click(point(px(350.), px(20.)), Modifiers::none());
+        view.read_with(cx, |h, _| {
+            assert_eq!((h.clicked, h.toggled, h.picked), (1, 1, 1), "cada control recibe su clic");
+            assert_eq!(h.dragged, 1, "solo la zona vacía empieza a arrastrar");
+        });
+    }
 }
