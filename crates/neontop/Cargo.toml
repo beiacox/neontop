@@ -1,0 +1,10 @@
+[package]
+name = "neontop"
+description = "Monitor de recursos del sistema con estética neón"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+neontop-core.workspace = true

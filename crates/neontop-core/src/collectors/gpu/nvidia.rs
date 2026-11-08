@@ -18,8 +18,8 @@ pub struct Nvidia {
 }
 
 /// Velocidad por carril de cada generación PCIe (GT/s).
-fn gen_speed(gen: u32) -> f32 {
-    match gen {
+fn gen_speed(generation: u32) -> f32 {
+    match generation {
         1 => 2.5,
         2 => 5.0,
         3 => 8.0,
@@ -83,8 +83,8 @@ impl Nvidia {
                 (Some(peak), Some(u)) => Some(peak * u.memory as f64 / 100.0),
                 _ => None,
             };
-            let (gen, width) = (d.current_pcie_link_gen().ok(), d.current_pcie_link_width().ok());
-            let pcie_speed = gen.map(gen_speed);
+            let (generation, width) = (d.current_pcie_link_gen().ok(), d.current_pcie_link_width().ok());
+            let pcie_speed = generation.map(gen_speed);
 
             let mut engines = Vec::new();
             if let Some(u) = &util {

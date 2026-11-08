@@ -13,7 +13,7 @@ use std::path::PathBuf;
 use crate::collectors::{energy::RAPL_RULE_PATH, processes};
 
 /// Regla udev que abre RAPL en cada arranque (también se instala en /usr/share/neontop).
-pub const RAPL_RULE: &str = include_str!("../../packaging/60-neontop-rapl.rules");
+pub const RAPL_RULE: &str = include_str!("../../../packaging/60-neontop-rapl.rules");
 
 fn rapl_files() -> Vec<PathBuf> {
     fs::read_dir("/sys/class/powercap")
