@@ -12,3 +12,6 @@ serde_json.workspace = true
 libc.workspace = true
 if-addrs = "0.15.0"
 nvml-wrapper = "0.13.0"
+
+[dev-dependencies]
+neontop-fps-shm = { path = "../neontop-fps-shm" }

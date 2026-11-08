@@ -1,0 +1,11 @@
+[package]
+name = "neontop-fps"
+description = "NeonTop FPS: lanza un programa (o un juego de Steam) con la medición de FPS activada"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "neontop-fps"
+path = "src/main.rs"

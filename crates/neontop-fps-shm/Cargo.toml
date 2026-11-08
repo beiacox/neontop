@@ -1,0 +1,10 @@
+[package]
+name = "neontop-fps-shm"
+description = "NeonTop FPS: formato de la memoria compartida y registro de fotogramas (sin std)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+libc.workspace = true

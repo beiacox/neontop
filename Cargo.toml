@@ -13,7 +13,7 @@ repository = "https://github.com/beiacox/neontop"
 neontop-core = { path = "crates/neontop-core" }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
-libc = "0.2.189"
+libc = { version = "0.2.189", default-features = false }
 
 [profile.release]
 codegen-units = 1
@@ -21,6 +21,11 @@ lto = true
 opt-level = 3
 panic = "abort"
 strip = true
+
+# Las librerías de la capa de FPS son `no_std` (se cargan dentro de los juegos): sin std no hay
+# desenrollado, así que también en desarrollo un pánico aborta.
+[profile.dev]
+panic = "abort"
 
 # GPUI compila mucho código: en desarrollo las dependencias van optimizadas para que la interfaz
 # no vaya a tirones, y el crate propio en debug para compilar rápido.

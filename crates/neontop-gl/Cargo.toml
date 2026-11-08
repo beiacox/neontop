@@ -1,0 +1,15 @@
+[package]
+name = "neontop-gl"
+description = "NeonTop FPS: precarga de OpenGL (GLX y EGL) para medir fotogramas"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[lib]
+name = "neontop_gl"
+crate-type = ["cdylib"]
+
+[dependencies]
+libc.workspace = true
+neontop-fps-shm = { path = "../neontop-fps-shm" }

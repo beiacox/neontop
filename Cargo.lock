@@ -3365,9 +3365,37 @@ version = "0.14.0"
 dependencies = [
  "if-addrs",
  "libc",
+ "neontop-fps-shm",
  "nvml-wrapper",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "neontop-fps"
+version = "0.14.0"
+
+[[package]]
+name = "neontop-fps-shm"
+version = "0.14.0"
+dependencies = [
+ "libc",
+]
+
+[[package]]
+name = "neontop-gl"
+version = "0.14.0"
+dependencies = [
+ "libc",
+ "neontop-fps-shm",
+]
+
+[[package]]
+name = "neontop-layer"
+version = "0.14.0"
+dependencies = [
+ "libc",
+ "neontop-fps-shm",
 ]
 
 [[package]]
