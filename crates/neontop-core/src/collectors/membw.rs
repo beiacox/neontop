@@ -2,7 +2,7 @@
 //! que es lo único con permiso para leer los contadores del controlador de memoria
 //! (CAP_PERFMON); aquí se lanza, se lee su salida en un hilo y se calcula la velocidad.
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
@@ -11,7 +11,7 @@ use std::thread;
 
 use crate::helper::{MEMBW_CONF, MEMBW_PATH};
 
-#[derive(Serialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct MemBwSnapshot {
     /// "ok" | "nomodule" | "noperm" | "nopmu" | "unsupported" | "missing" | "error" | "starting"

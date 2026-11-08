@@ -3,12 +3,12 @@
 //! Linux no expone el tráfico de memoria en vivo sin privilegios (haría falta leer los
 //! contadores PMU del controlador de memoria), así que se mide el máximo alcanzable.
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::hint::black_box;
 use std::thread;
 use std::time::Instant;
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct MemBench {
     /// Bytes/s con todos los hilos.

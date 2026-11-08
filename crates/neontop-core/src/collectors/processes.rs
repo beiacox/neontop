@@ -1,10 +1,10 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
 use std::os::unix::fs::MetadataExt;
 use std::time::Instant;
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct ProcInfo {
     pub pid: u32,
@@ -34,7 +34,7 @@ pub struct ProcInfo {
     pub kernel: bool,
 }
 
-#[derive(Serialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct ProcSnapshot {
     pub procs: Vec<ProcInfo>,

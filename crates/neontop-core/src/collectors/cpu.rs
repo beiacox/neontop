@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 use std::time::Instant;
@@ -39,7 +39,7 @@ impl Times {
 }
 
 /// Reparto porcentual del tiempo de CPU entre dos lecturas.
-#[derive(Serialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct CpuBreakdown {
     pub usage: f32,
@@ -72,7 +72,7 @@ fn breakdown(prev: &Times, cur: &Times) -> CpuBreakdown {
     }
 }
 
-#[derive(Serialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct CpuSnapshot {
     pub total: CpuBreakdown,

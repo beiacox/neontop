@@ -6,14 +6,14 @@ mod fdinfo;
 mod intel;
 mod nvidia;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use super::read_trim;
 
-#[derive(Serialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct GpuEngine {
     /// Nombre del motor tal como lo da el driver (gfx, compute, dec, render, video…).
@@ -21,7 +21,7 @@ pub struct GpuEngine {
     pub busy: f32,
 }
 
-#[derive(Serialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct GpuProc {
     pub pid: u32,
@@ -33,7 +33,7 @@ pub struct GpuProc {
     pub gtt: u64,
 }
 
-#[derive(Serialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct GpuSnapshot {
     pub name: String,

@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::ffi::CString;
 use std::fs;
@@ -8,7 +8,7 @@ use std::time::Instant;
 use super::hwmon::{self, TempReading};
 use super::{read_trim, read_u64};
 
-#[derive(Serialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct DiskSnapshot {
     pub name: String,
@@ -34,7 +34,7 @@ pub struct DiskSnapshot {
     pub partitions: Vec<String>,
 }
 
-#[derive(Serialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct FsSnapshot {
     pub device: String,
@@ -52,7 +52,7 @@ pub struct FsSnapshot {
     pub readonly: bool,
 }
 
-#[derive(Serialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct DiskIoSnapshot {
     pub disks: Vec<DiskSnapshot>,

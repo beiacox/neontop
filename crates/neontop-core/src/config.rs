@@ -25,11 +25,57 @@ pub struct Config {
     pub fps_auto: bool,
     /// Se desactivó lo anterior: quitar `neontop-fps` cuando cada lanzador esté cerrado.
     pub fps_auto_cleanup: bool,
+    /// Ajustes de la interfaz (tema, muestreo, ventana…).
+    pub ui: UiSettings,
 }
+
+/// Ajustes de la ventana. Antes se guardaban en el almacenamiento del navegador.
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+#[serde(rename_all = "camelCase", default)]
+pub struct UiSettings {
+    /// Id del tema o "sistema" (sigue el modo claro/oscuro del escritorio).
+    pub theme: String,
+    pub interval_ms: u64,
+    /// Ventana de las gráficas en segundos; `None` = ilimitada.
+    pub window_sec: Option<u64>,
+    pub scanlines: bool,
+    pub glow: bool,
+    /// Última pestaña abierta.
+    pub tab: String,
+    /// Cerrar la ventana la deja en la bandeja del sistema.
+    pub close_to_tray: bool,
+    /// Repetir como root (con contraseña, vía polkit) las acciones que lo necesiten.
+    pub admin_actions: bool,
+    /// Precio de la electricidad por kWh y símbolo de moneda.
+    pub price: f64,
+    pub currency: String,
+}
+
+impl Default for UiSettings {
+    fn default() -> Self {
+        UiSettings {
+            theme: crate::theme::DEFAULT_THEME.into(),
+            interval_ms: 1000,
+            window_sec: Some(120),
+            scanlines: true,
+            glow: true,
+            tab: "overview".into(),
+            close_to_tray: false,
+            admin_actions: false,
+            price: 0.15,
+            currency: "$".into(),
+        }
+    }
+}
+
+/// Muestreos que ofrece la interfaz (ms).
+pub const INTERVALS: [u64; 5] = [250, 500, 1000, 2000, 5000];
+/// Ventanas de las gráficas (s); `None` = ilimitada.
+pub const WINDOWS: [Option<u64>; 7] = [Some(60), Some(120), Some(300), Some(900), Some(3600), Some(6 * 3600), None];
 
 impl Default for Config {
     fn default() -> Self {
-        Config { web_enabled: false, web_port: DEFAULT_PORT, web_token: new_token(), web_actions: false, start_hidden: true, fps_auto: true, fps_auto_cleanup: false }
+        Config { web_enabled: false, web_port: DEFAULT_PORT, web_token: new_token(), web_actions: false, start_hidden: true, fps_auto: true, fps_auto_cleanup: false, ui: UiSettings::default() }
     }
 }
 

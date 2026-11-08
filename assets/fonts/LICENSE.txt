@@ -1,0 +1,10 @@
+Fuentes incluidas (convertidas a TTF desde los paquetes @fontsource, subconjunto latino).
+Todas se distribuyen bajo la SIL Open Font License 1.1 (https://openfontlicense.org):
+
+- Orbitron        © The Orbitron Project Authors
+- JetBrains Mono  © The JetBrains Mono Project Authors
+- Inter           © The Inter Project Authors
+- Space Grotesk   © The Space Grotesk Project Authors
+- VT323           © The VT323 Project Authors
+- Lora            © The Lora Project Authors
+- IBM Plex Mono   © IBM Corp.

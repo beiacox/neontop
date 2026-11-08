@@ -1,8 +1,8 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::fs;
 
 /// Valores de /proc/meminfo en bytes. El reparto (apps/caché/buffers…) se calcula en el frontend.
-#[derive(Serialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct MemSnapshot {
     pub total: u64,

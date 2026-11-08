@@ -1,13 +1,13 @@
 //! Todos los sensores hwmon del sistema (temperaturas, ventiladores, voltajes, potencia)
 //! más las baterías de /sys/class/power_supply.
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
 
 use super::{read_trim, read_u64};
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct Reading {
     /// Identificador estable: "<chip>/<sensor>", p. ej. "k10temp/temp1".
@@ -20,7 +20,7 @@ pub struct Reading {
     pub crit: Option<f64>,
 }
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct Chip {
     pub id: String,
@@ -33,7 +33,7 @@ pub struct Chip {
     pub readings: Vec<Reading>,
 }
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct Battery {
     pub name: String,
@@ -47,7 +47,7 @@ pub struct Battery {
     pub cycles: Option<u32>,
 }
 
-#[derive(Serialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct SensorSnapshot {
     pub chips: Vec<Chip>,

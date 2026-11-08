@@ -5,7 +5,7 @@
 //! mapea en memoria (solo lectura) y en cada muestra se envían los tiempos de fotograma nuevos;
 //! las estadísticas (1 % bajo, tirones, estabilidad…) se calculan en la interfaz.
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -21,7 +21,7 @@ const STALE_NS: u64 = 3_000_000_000;
 
 pub const LAYER_MANIFEST: &str = "/usr/share/vulkan/implicit_layer.d/neontop_fps.x86_64.json";
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct GameSnapshot {
     pub pid: u32,
@@ -44,7 +44,7 @@ pub struct GameSnapshot {
     pub duration: f64,
 }
 
-#[derive(Serialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct GamesSnapshot {
     pub games: Vec<GameSnapshot>,

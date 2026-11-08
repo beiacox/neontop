@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
@@ -6,7 +6,7 @@ use std::time::Instant;
 
 use super::{read_trim, read_u64};
 
-#[derive(Serialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct IfaceSnapshot {
     pub name: String,
@@ -30,7 +30,7 @@ pub struct IfaceSnapshot {
     pub tx_drop: u64,
 }
 
-#[derive(Serialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct NetSnapshot {
     pub ifaces: Vec<IfaceSnapshot>,

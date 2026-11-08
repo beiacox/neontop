@@ -8,7 +8,7 @@
 //! - hwmon: cualquier otro sensor de potencia (zenpower, fuentes de alimentación, placa…).
 //! - Baterías: descargando, su potencia es el consumo total del equipo.
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::io::ErrorKind;
 use std::path::PathBuf;
@@ -18,7 +18,7 @@ use super::gpu::GpuSnapshot;
 use super::sensors::SensorSnapshot;
 use super::{read_trim, read_u64};
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct EnergySource {
     /// Identificador estable ("rapl:intel-rapl:0", "gpu:0000:03:00.0", "bat:BAT0"…).
@@ -42,7 +42,7 @@ pub struct EnergySource {
     pub parent: Option<String>,
 }
 
-#[derive(Serialize, Clone, Default)]
+#[derive(Serialize, Deserialize, Clone, Default, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct EnergySnapshot {
     pub sources: Vec<EnergySource>,
