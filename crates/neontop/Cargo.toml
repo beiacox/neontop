@@ -8,3 +8,13 @@ authors.workspace = true
 
 [dependencies]
 neontop-core.workspace = true
+gpui = "0.2.2"
+futures = "0.3"
+unicode-segmentation = "1"
+tiny_http = "0.12.0"
+if-addrs = "0.15.0"
+ksni = { version = "0.3", default-features = false, features = ["blocking", "async-io"] }
+notify-rust = "4"
+qrcode = { version = "0.14", default-features = false }
+serde_json.workspace = true
+libc.workspace = true
