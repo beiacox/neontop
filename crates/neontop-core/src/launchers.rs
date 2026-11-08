@@ -55,11 +55,10 @@ fn running(comms: &[&str]) -> bool {
         if e.metadata().map(|m| m.uid() != uid).unwrap_or(true) {
             continue;
         }
-        if let Ok(c) = fs::read_to_string(format!("/proc/{pid}/comm")) {
-            if comms.contains(&c.trim_end()) {
+        if let Ok(c) = fs::read_to_string(format!("/proc/{pid}/comm"))
+            && comms.contains(&c.trim_end()) {
                 return true;
             }
-        }
     }
     false
 }
@@ -337,14 +336,13 @@ fn steam(add: Option<bool>) -> Option<LauncherStatus> {
         let mut best = 0;
         for cfg in steam_configs(root) {
             let Ok(mut text) = fs::read_to_string(&cfg) else { continue };
-            if let (Some(a), false) = (add, run) {
-                if let (Some(new), _) = steam_edit(&text, &games, a) {
+            if let (Some(a), false) = (add, run)
+                && let (Some(new), _) = steam_edit(&text, &games, a) {
                     match write_file(&cfg, &new) {
                         Ok(()) => text = new,
                         Err(e) => eprintln!("NeonTop: no se pudo escribir {}: {e}", cfg.display()),
                     }
                 }
-            }
             // con varias cuentas en el equipo se muestra la más completa
             best = best.max(count_steam(&text, &games));
         }
@@ -424,11 +422,10 @@ fn heroic(add: Option<bool>) -> Option<LauncherStatus> {
         }
         if changed {
             // Heroic guarda con JSON.stringify(…, null, 2): mismo formato
-            if let Ok(s) = serde_json::to_string_pretty(&v) {
-                if let Err(e) = write_file(&path, &s) {
+            if let Ok(s) = serde_json::to_string_pretty(&v)
+                && let Err(e) = write_file(&path, &s) {
                     eprintln!("NeonTop: no se pudo escribir {}: {e}", path.display());
                 }
-            }
         }
     }
     Some(LauncherStatus { id: "heroic", name: "Heroic", total, applied, running: run, scope: "envoltorio de cada juego y de los juegos nuevos" })
@@ -486,15 +483,14 @@ fn lutris(add: Option<bool>) -> Option<LauncherStatus> {
     let run = running(&["lutris"]);
     let text = fs::read_to_string(&path).unwrap_or_default();
     let mut has = lutris_edit(&text, true).is_none();
-    if let (Some(a), false) = (add, run) {
-        if let Some(new) = lutris_edit(&text, a) {
+    if let (Some(a), false) = (add, run)
+        && let Some(new) = lutris_edit(&text, a) {
             let res = if path.exists() { write_file(&path, &new) } else { fs::write(&path, &new) };
             match res {
                 Ok(()) => has = a,
                 Err(e) => eprintln!("NeonTop: no se pudo escribir {}: {e}", path.display()),
             }
         }
-    }
     Some(LauncherStatus { id: "lutris", name: "Lutris", total: 1, applied: has as usize, running: run, scope: "prefijo de comando global" })
 }
 
@@ -530,14 +526,13 @@ fn prism(add: Option<bool>) -> Option<LauncherStatus> {
     let text = fs::read_to_string(&path).ok()?;
     let run = running(&["prismlauncher"]);
     let mut has = prism_edit(&text, true).is_none();
-    if let (Some(a), false) = (add, run) {
-        if let Some(new) = prism_edit(&text, a) {
+    if let (Some(a), false) = (add, run)
+        && let Some(new) = prism_edit(&text, a) {
             match write_file(&path, &new) {
                 Ok(()) => has = a,
                 Err(e) => eprintln!("NeonTop: no se pudo escribir {}: {e}", path.display()),
             }
         }
-    }
     Some(LauncherStatus { id: "prism", name: "Prism Launcher", total: 1, applied: has as usize, running: run, scope: "envoltorio global de Minecraft" })
 }
 

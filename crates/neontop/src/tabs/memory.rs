@@ -84,7 +84,7 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
                 .flex()
                 .flex_col()
                 .child(kit::muted(th.title(label), cx).text_size(px(9.5)))
-                .child(div().font_family(th.display.clone()).text_size(px(18.)).text_color(th.cyan).child(value))
+                .child(div().font_family(th.display.clone()).text_size(px(th.dsize(18.))).text_color(th.cyan).child(value))
                 .children(sub.map(|s| kit::muted(s, cx)))
         };
         let mut p = Plot::new(bw_lines, t.clone()).y_fmt(y_gbs).height(190.);
@@ -188,7 +188,7 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
                             .flex()
                             .flex_col()
                             .child(kit::muted("LATENCIA", cx).text_size(px(9.5)))
-                            .child(div().font_family(th.display.clone()).text_size(px(22.)).text_color(th.amber).child(format!("{:.1} ns", r.latency_ns)))
+                            .child(div().font_family(th.display.clone()).text_size(px(th.dsize(22.))).text_color(th.amber).child(format!("{:.1} ns", r.latency_ns)))
                             .child(kit::muted("acceso aleatorio a memoria", cx))
                             .child(kit::muted(format!("{} · {:.1} s", fmt::datetime(r.ts), r.duration_ms / 1000.0), cx)),
                     ),

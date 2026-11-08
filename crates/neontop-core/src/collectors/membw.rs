@@ -54,8 +54,15 @@ fn helper_path() -> Option<PathBuf> {
     if installed.exists() {
         return Some(installed);
     }
-    let dev = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../packaging/membw/target/release/neontop-membw");
-    dev.exists().then_some(dev)
+    // en desarrollo: el binario compilado en el espacio de trabajo
+    let target = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../target");
+    ["release", "debug"].into_iter().map(|p| target.join(p).join("neontop-membw")).find(|p| p.exists())
+}
+
+impl Default for MemBw {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl MemBw {

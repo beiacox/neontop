@@ -61,9 +61,11 @@ struct ChipStatic {
     driver: String,
     label: String,
     category: String,
-    /// (sensor, tipo, etiqueta, escala, max, crit)
-    sensors: Vec<(String, String, String, f64, Option<f64>, Option<f64>)>,
+    sensors: Vec<SensorDef>,
 }
+
+/// (sensor, tipo, etiqueta, escala, max, crit)
+type SensorDef = (String, String, String, f64, Option<f64>, Option<f64>);
 
 pub struct SensorCollector {
     chips: Vec<ChipStatic>,
@@ -191,6 +193,12 @@ fn batteries() -> (Vec<Battery>, Option<bool>) {
     (bats, ac)
 }
 
+impl Default for SensorCollector {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SensorCollector {
     pub fn new() -> Self {
         SensorCollector { chips: scan(), last_scan: std::time::Instant::now() }
@@ -214,7 +222,7 @@ impl SensorCollector {
                     .sensors
                     .iter()
                     .filter_map(|(sensor, kind, label, scale, max, crit)| {
-                        let raw = read_trim(c.dir.join(if kind == "pwm" { sensor.clone() } else if sensor.ends_with("_average") { sensor.clone() } else { format!("{sensor}_input") }))?;
+                        let raw = read_trim(c.dir.join(if kind == "pwm" || sensor.ends_with("_average") { sensor.clone() } else { format!("{sensor}_input") }))?;
                         Some(Reading {
                             id: format!("{}/{}", c.id, sensor),
                             label: label.clone(),

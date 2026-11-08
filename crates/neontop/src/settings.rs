@@ -3,7 +3,7 @@
 
 use gpui::{canvas, div, fill, point, prelude::*, px, size, AnyElement, App, Bounds, Context, Entity, FontWeight, ScrollHandle, SharedString, Subscription, WeakEntity, Window};
 use neontop_core::alerts::{multi, Channel};
-use neontop_core::config::{INTERVALS, WINDOWS};
+use neontop_core::config::WINDOWS;
 use neontop_core::format as fmt;
 use neontop_core::theme::{CATEGORIES, SYSTEM_THEME, THEMES};
 
@@ -36,7 +36,7 @@ impl SettingsView {
         let subs = vec![
             cx.observe(&st, |_, _, cx| cx.notify()),
             cx.subscribe(&port, |this, input, ev: &InputEvent, cx| {
-                if let InputEvent::Submit(_) = ev {
+                if let InputEvent::Submit = ev {
                     let p = input.read(cx).text().trim().parse::<u16>().ok();
                     this.set_web(None, p, None, cx);
                 }
@@ -80,7 +80,7 @@ impl SettingsView {
             .py(px(12.))
             .border_b_1()
             .border_color(th.border(th.cyan))
-            .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(12.5)).text_color(th.cyan).child(th.title(title)))
+            .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(th.dsize(12.5))).text_color(th.cyan).child(th.title(title)))
     }
 
     fn themes(&self, cx: &mut Context<Self>) -> impl IntoElement {
@@ -563,7 +563,7 @@ impl Render for SettingsView {
                         .flex()
                         .items_center()
                         .gap(px(14.))
-                        .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(24.)).text_color(th.cyan).child(fmt::interval(ui.interval_ms)))
+                        .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(th.dsize(24.))).text_color(th.cyan).child(fmt::interval(ui.interval_ms)))
                         .child(kit::muted(format!("{} muestras/min", (60_000 / ui.interval_ms.max(1)).max(1)), cx))
                         .child(kit::button("s-pause", if paused { "▶ Reanudar" } else { "⏸ Pausar" }, if paused { th.amber } else { th.cyan }, cx).on_click(cx.listener(|this, _, _, cx| {
                             this.st(cx).update(cx, |s, cx| s.toggle_pause(cx));
@@ -626,7 +626,7 @@ impl Render for SettingsView {
                         .child(kit::button("s-csv-all", "CSV · todo el historial", th.cyan, cx).on_click(cx.listener(|this, _, _, cx| this.export(true, cx)))),
                 )
                 .child(kit::muted("Valores sin reducir en unidades base (%, bytes, bytes/s, °C, MHz, W): CPU, núcleos, memoria, red, discos, GPU, sensores y energía.", cx))
-                .children(self.msg.clone().map(|m| crate::tabs::memory::notice_line(Some(m), cx)).flatten())
+                .children(self.msg.clone().and_then(|m| crate::tabs::memory::notice_line(Some(m), cx)))
                 .into_any_element(),
             self.system(cx).into_any_element(),
             Self::section("Acerca de", cx)
@@ -664,7 +664,7 @@ impl Render for SettingsView {
                     .py(px(12.))
                     .border_b_1()
                     .border_color(th.border(th.cyan))
-                    .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(18.)).child(th.title("Ajustes")))
+                    .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(th.dsize(18.))).child(th.title("Ajustes")))
                     .child(div().id("s-close").cursor_pointer().text_color(th.muted).hover(|s| s.text_color(th.red)).child("✕").on_click(move |_, _, cx| {
                         let _ = root.update(cx, |r, cx| r.close_settings(cx));
                     })),

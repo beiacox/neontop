@@ -30,11 +30,6 @@ pub fn muted(s: impl Into<SharedString>, cx: &App) -> gpui::Div {
     div().text_size(px(11.)).text_color(th.muted).child(s.into())
 }
 
-/// Texto con la fuente de cifras (monoespaciada).
-pub fn mono(s: impl Into<SharedString>, cx: &App) -> gpui::Div {
-    let th = Th::get(cx);
-    div().font_family(th.mono.clone()).child(s.into())
-}
 
 /// Panel con título, color de acento y contenido.
 #[derive(IntoElement)]
@@ -60,14 +55,6 @@ impl Panel {
     /// Contenido a la derecha del título (valor actual, leyenda…).
     pub fn extra(mut self, e: impl IntoElement) -> Self {
         self.extra = Some(e.into_any_element());
-        self
-    }
-    pub fn min_h(mut self, h: f32) -> Self {
-        self.min_h = Some(h);
-        self
-    }
-    pub fn flush(mut self) -> Self {
-        self.pad = false;
         self
     }
 }
@@ -113,7 +100,7 @@ impl RenderOnce for Panel {
                 div()
                     .font_family(th.display.clone())
                     .font_weight(FontWeight::BOLD)
-                    .text_size(px(if th.upper() { 11.5 } else { 13. }))
+                    .text_size(px(th.dsize(if th.upper() { 11.5 } else { 13. })))
                     .text_color(accent)
                     .truncate()
                     .child(th.title(&self.title)),
@@ -177,9 +164,9 @@ pub fn stat(label: impl Into<SharedString>, value: impl Into<SharedString>, sub:
         .border_color(color)
         .rounded(px(th.radius.min(6.)))
         .child(div().text_size(px(9.5)).text_color(th.muted).font_family(th.mono.clone()).truncate().child(th.title(&label.into())))
-        .child(div().text_size(px(21.)).font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_color(color).truncate().child(value.into()))
-        .child(div().text_size(px(10.)).text_color(th.muted).font_family(th.mono.clone()).truncate().when(has_spark, |d| d.mr(px(100.))).child(sub.into()))
-        .children(spark.filter(|s| s.len() > 1).map(|s| div().absolute().right(px(6.)).bottom(px(6.)).w(px(96.)).h(px(26.)).child(charts::sparkline(s, color, 26., None))))
+        .child(div().text_size(px(th.dsize(21.))).font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_color(color).truncate().child(value.into()))
+        .child(div().text_size(px(10.)).text_color(th.muted).font_family(th.mono.clone()).truncate().when(has_spark, |d| d.mr(px(66.))).child(sub.into()))
+        .children(spark.filter(|s| s.len() > 1).map(|s| div().absolute().right(px(6.)).bottom(px(6.)).w(px(60.)).h(px(24.)).child(charts::sparkline(s, color, 24., None))))
 }
 
 /// Fila de cifras (tira superior de cada pestaña): se reparte en tantas columnas como quepan.

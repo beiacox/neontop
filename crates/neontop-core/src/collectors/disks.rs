@@ -190,10 +190,10 @@ fn filesystems(disks: &[DiskStatic]) -> Vec<FsSnapshot> {
             continue;
         }
         let Some(st) = statvfs(&mount) else { continue };
-        let frsize = st.f_frsize as u64;
-        let total = st.f_blocks as u64 * frsize;
-        let avail = st.f_bavail as u64 * frsize;
-        let free = st.f_bfree as u64 * frsize;
+        let frsize = st.f_frsize;
+        let total = st.f_blocks * frsize;
+        let avail = st.f_bavail * frsize;
+        let free = st.f_bfree * frsize;
         let dev_name = device.rsplit('/').next().unwrap_or("");
         let disk = disks
             .iter()
@@ -207,8 +207,8 @@ fn filesystems(disks: &[DiskStatic]) -> Vec<FsSnapshot> {
             total,
             used: total.saturating_sub(free),
             avail,
-            inodes_total: st.f_files as u64,
-            inodes_free: st.f_ffree as u64,
+            inodes_total: st.f_files,
+            inodes_free: st.f_ffree,
             readonly: f[3].split(',').any(|o| o == "ro"),
             device,
         });
@@ -240,6 +240,12 @@ fn read_stats() -> HashMap<String, Stat> {
             ))
         })
         .collect()
+}
+
+impl Default for DiskCollector {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl DiskCollector {

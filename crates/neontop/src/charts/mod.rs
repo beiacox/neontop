@@ -21,6 +21,7 @@ pub enum Align {
     Right,
 }
 
+#[allow(clippy::too_many_arguments)]
 /// Pinta una línea de texto con la fuente `family` (la x de `at` según `align`, la y es la parte superior).
 pub fn paint_text(window: &mut Window, cx: &mut App, s: &str, at: Point<Pixels>, size: f32, color: Hsla, family: &SharedString, align: Align) -> f32 {
     if s.is_empty() {
@@ -117,10 +118,6 @@ impl Line {
         self.dashed = true;
         self
     }
-    pub fn xs(mut self, xs: Vec<f64>) -> Self {
-        self.xs = xs;
-        self
-    }
 }
 
 /// Cómo se rotulan las abscisas.
@@ -208,10 +205,6 @@ impl Plot {
         self.stacked = true;
         self
     }
-    pub fn bars(mut self) -> Self {
-        self.bars = true;
-        self
-    }
     pub fn x_axis(mut self, a: XAxis) -> Self {
         self.x_axis = a;
         self
@@ -222,10 +215,6 @@ impl Plot {
     }
     pub fn hline(mut self, v: f32, color: Hsla, label: impl Into<String>) -> Self {
         self.hlines.push((v, color, label.into()));
-        self
-    }
-    pub fn vline(mut self, x: f64, color: Hsla) -> Self {
-        self.vlines.push((x, color));
         self
     }
     pub fn dots(mut self, d: Vec<(f64, f32, Hsla)>) -> Self {
@@ -428,7 +417,7 @@ pub fn gauge(frac: f32, color: Hsla, value: String, sub: String, label: String, 
                 stroke(window, &pts, width, color, false);
             }
             let big = (r * 0.36).clamp(14.0, 40.0);
-            paint_text(window, cx, &value, point(c.x, c.y - px(big * 0.75)), big, color, &th.display, Align::Center);
+            paint_text(window, cx, &value, point(c.x, c.y - px(th.dsize(big) * 0.75)), th.dsize(big), color, &th.display, Align::Center);
             paint_text(window, cx, &sub, point(c.x, c.y + px(big * 0.55)), 10.5, th.muted, &th.mono, Align::Center);
             paint_text(window, cx, &label, point(c.x, c.y + px(r * 0.72)), 10.5, th.muted, &th.display, Align::Center);
         },
@@ -456,7 +445,7 @@ pub fn ring(parts: Vec<(f32, Hsla)>, center: String, sub: String, height: f32) -
                 a += sweep;
             }
             let big = (r * 0.32).clamp(12.0, 30.0);
-            paint_text(window, cx, &center, point(c.x, c.y - px(big * 0.8)), big, th.text, &th.display, Align::Center);
+            paint_text(window, cx, &center, point(c.x, c.y - px(th.dsize(big) * 0.8)), th.dsize(big), th.text, &th.display, Align::Center);
             paint_text(window, cx, &sub, point(c.x, c.y + px(big * 0.45)), 10.0, th.muted, &th.mono, Align::Center);
         },
     )
@@ -518,32 +507,6 @@ pub fn segments(parts: Vec<(f32, Hsla)>, height: f32) -> impl IntoElement {
         }
     }
     row
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn stacked_prepare() {
-        let red = gpui::red();
-        let p = Plot::new(vec![Line::new(vec![1.0, 2.0], red), Line::new(vec![3.0, 4.0], red)], vec![0.0, 1.0]).stacked();
-        let (max, ys) = p.prepare();
-        assert_eq!(ys[1], vec![4.0, 6.0]);
-        assert!(max >= 6.0);
-        let p = Plot::new(vec![Line::new(vec![5.0], red)], vec![]).y_max(100.0);
-        assert_eq!(p.prepare().0, 100.0);
-    }
-
-    #[test]
-    fn plain_format() {
-        assert_eq!(fmt_plain(0.0), "0");
-        assert_eq!(fmt_plain(250.0), "250");
-        assert_eq!(fmt_plain(12.5), "12.5");
-        assert_eq!(fmt_plain(20.0), "20");
-        assert_eq!(fmt_plain(0.25), "0.25");
-        assert_eq!(fmt_plain(1.5), "1.5");
-    }
 }
 
 /// Radar (perfil): ejes con su rótulo y valor 0–100.
@@ -735,4 +698,30 @@ pub fn histogram(bins: Vec<(f32, Hsla)>, step: f32, unit: &'static str, height: 
     )
     .w_full()
     .h(px(height))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn stacked_prepare() {
+        let red = gpui::red();
+        let p = Plot::new(vec![Line::new(vec![1.0, 2.0], red), Line::new(vec![3.0, 4.0], red)], vec![0.0, 1.0]).stacked();
+        let (max, ys) = p.prepare();
+        assert_eq!(ys[1], vec![4.0, 6.0]);
+        assert!(max >= 6.0);
+        let p = Plot::new(vec![Line::new(vec![5.0], red)], vec![]).y_max(100.0);
+        assert_eq!(p.prepare().0, 100.0);
+    }
+
+    #[test]
+    fn plain_format() {
+        assert_eq!(fmt_plain(0.0), "0");
+        assert_eq!(fmt_plain(250.0), "250");
+        assert_eq!(fmt_plain(12.5), "12.5");
+        assert_eq!(fmt_plain(20.0), "20");
+        assert_eq!(fmt_plain(0.25), "0.25");
+        assert_eq!(fmt_plain(1.5), "1.5");
+    }
 }

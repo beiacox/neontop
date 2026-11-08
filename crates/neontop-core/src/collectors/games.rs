@@ -127,6 +127,12 @@ pub struct GamesCollector {
     last_scan: Option<Instant>,
 }
 
+impl Default for GamesCollector {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl GamesCollector {
     pub fn new() -> Self {
         GamesCollector { games: HashMap::new(), steam_names: HashMap::new(), last_scan: None }

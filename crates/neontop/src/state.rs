@@ -81,7 +81,6 @@ pub struct AppState {
     pub membench_running: bool,
     /// Último mensaje de una acción (permisos RAPL, tráfico de RAM, Steam…).
     pub notice: Option<Notice>,
-    pub tx: UnboundedSender<Msg>,
     pub web: crate::web::Web,
 }
 
@@ -95,10 +94,6 @@ pub fn state(cx: &App) -> Entity<AppState> {
 }
 
 impl AppState {
-    pub fn get(cx: &App) -> &AppState {
-        cx.global::<StateHandle>().0.read(cx)
-    }
-
     /// Recogida cara pedida (`on`) o liberada por la vista `who`.
     pub fn want(&mut self, kind: &'static str, who: &'static str, on: bool) {
         let changed = if on { self.wants.insert((kind, who)) } else { self.wants.remove(&(kind, who)) };
@@ -170,10 +165,6 @@ impl AppState {
         self.model.history.window(self.ui.window_sec.map(|s| s as f64))
     }
 
-    pub fn snap(&self) -> &Snapshot {
-        &self.model.snap
-    }
-
     fn on_msg(&mut self, msg: Msg, cx: &mut Context<Self>) {
         match msg {
             Msg::Metrics(s) => {
@@ -240,11 +231,10 @@ impl AppState {
                     s.membench.push(b);
                     let keep = s.membench.len().saturating_sub(30);
                     s.membench.drain(..keep);
-                    if !s.demo {
-                        if let Some(d) = neontop_core::paths::data_dir() {
+                    if !s.demo
+                        && let Some(d) = neontop_core::paths::data_dir() {
                             let _ = neontop_core::paths::write_json(&d.join("membench.json"), &s.membench);
                         }
-                    }
                 }
             },
         );
@@ -305,7 +295,6 @@ pub fn init(cx: &mut App, demo: bool) -> (Entity<AppState>, UnboundedSender<Msg>
         membench: if demo { Vec::new() } else { neontop_core::paths::data_dir().map(|d| neontop_core::paths::read_json(&d.join("membench.json"))).unwrap_or_default() },
         membench_running: false,
         notice: None,
-        tx: tx.clone(),
         web: web.clone(),
     });
     cx.set_global(StateHandle(entity.clone()));
@@ -356,7 +345,7 @@ fn spawn_demo(_cx: &mut App, ctl: Arc<Control>, tx: UnboundedSender<Msg>, web: c
                 let ms = ctl.interval_ms.load(std::sync::atomic::Ordering::Relaxed);
                 if !ctl.paused.load(std::sync::atomic::Ordering::Relaxed) {
                     feed.metrics(&Arc::new(demo.sample(ms, neontop_core::format::now_ms())));
-                    if ctl.collect.procs.load(std::sync::atomic::Ordering::Relaxed) || n % 5 == 0 {
+                    if ctl.collect.procs.load(std::sync::atomic::Ordering::Relaxed) || n.is_multiple_of(5) {
                         feed.procs(&Arc::new(demo.procs()));
                     }
                     n += 1;

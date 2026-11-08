@@ -87,6 +87,12 @@ fn socket_counts() -> (u32, u32, u32) {
     (est, listen, udp)
 }
 
+impl Default for NetCollector {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl NetCollector {
     pub fn new() -> Self {
         let mut c = NetCollector { prev: HashMap::new(), prev_at: Instant::now() };

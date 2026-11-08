@@ -148,6 +148,12 @@ pub struct EnergyCollector {
     total_j: f64,
 }
 
+impl Default for EnergyCollector {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl EnergyCollector {
     pub fn new() -> Self {
         let (rapl, rapl_status) = scan_rapl();

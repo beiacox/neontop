@@ -97,6 +97,12 @@ pub struct GpuCollector {
     cached: fdinfo::Usage,
 }
 
+impl Default for GpuCollector {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl GpuCollector {
     pub fn new() -> Self {
         let mut amd = Vec::new();

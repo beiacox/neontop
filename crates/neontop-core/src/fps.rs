@@ -508,6 +508,7 @@ impl GameTrack {
         self.n = 0;
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn summary(&self, id: String, kind: &str, date: u64, st: &FrameStats, res: &ResAcc, min_fps: f32, max_fps: f32) -> Benchmark {
         Benchmark {
             id,
@@ -818,7 +819,7 @@ mod tests {
         }
         assert_eq!(tl.len(), TL_CAP / 2);
         // el máximo se conserva al agrupar
-        assert!(tl.s[2].iter().any(|&v| v == 6.0));
+        assert!(tl.s[2].contains(&6.0));
         let d = tl.export(0, 100);
         assert!(d.t.len() <= 100);
         assert_eq!(d.t.len(), d.fps.len());

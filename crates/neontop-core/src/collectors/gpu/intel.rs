@@ -22,7 +22,7 @@ pub struct IntelGpu {
 
 /// Primer valor legible de una lista de rutas candidatas (i915 y xe usan nombres distintos).
 fn first_u64(paths: &[PathBuf]) -> Option<u64> {
-    paths.iter().find_map(|p| read_u64(p))
+    paths.iter().find_map(read_u64)
 }
 
 impl IntelGpu {

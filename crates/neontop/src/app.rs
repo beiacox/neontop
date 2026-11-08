@@ -156,7 +156,7 @@ impl Root {
             .items_baseline()
             .font_family(th.display.clone())
             .font_weight(FontWeight::BOLD)
-            .text_size(px(if wide { 22. } else { 16. }))
+            .text_size(px(th.dsize(if wide { 22. } else { 16. })))
             .child(div().text_color(th.cyan).child("NEON"))
             .child(div().text_color(th.magenta).child("TOP"))
             .on_mouse_down(MouseButton::Left, |_, window, _| window.start_window_move());
@@ -246,7 +246,7 @@ impl Root {
                     .flex()
                     .flex_col()
                     .items_end()
-                    .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(17.)).text_color(th.magenta).child(if ts > 0 { fmt::clock(ts) } else { "--:--:--".into() }))
+                    .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(th.dsize(17.))).text_color(th.magenta).child(if ts > 0 { fmt::clock(ts) } else { "--:--:--".into() }))
                     .child(div().text_size(px(9.5)).text_color(th.muted).font_family(th.mono.clone()).child(format!("up {}", fmt::duration(uptime)))),
             );
         div()
@@ -278,7 +278,7 @@ impl Root {
                             .flex()
                             .items_center()
                             .gap(px(10.))
-                            .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(20.)).text_color(th.text).child(th.title(title)))
+                            .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(th.dsize(20.))).text_color(th.text).child(th.title(title)))
                             .when(paused, |d| d.child(kit::badge("EN PAUSA", th.amber))),
                     )
                     .when(!narrow, |d| d.child(div().text_size(px(10.)).text_color(th.muted).font_family(th.mono.clone()).truncate().child(sub))),
@@ -310,6 +310,7 @@ impl Root {
                 .child(
                     div()
                         .flex()
+                        .flex_wrap()
                         .gap(px(6.))
                         .child(kit::button(SharedString::from(format!("mute-{id}")), "Silenciar 1 h", th.text, cx).on_click(cx.listener(move |this, _, _, cx| {
                             let rule = rule.clone();
@@ -609,6 +610,3 @@ pub fn on_window_closed(cx: &mut App) {
         cx.quit();
     }
 }
-
-/// Tamaño de un panel para gráficas (alto estándar).
-pub const CHART_H: f32 = 170.0;

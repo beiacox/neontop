@@ -276,11 +276,10 @@ fn action(inner: &Inner, f: &HashMap<String, String>) {
             }
         }
         Some("senal") if !inner.demo => {
-            if let (Some(pid), Some(sig)) = (f.get("pid").and_then(|v| v.parse().ok()), f.get("sig")) {
-                if ["TERM", "KILL", "STOP", "CONT"].contains(&sig.as_str()) {
+            if let (Some(pid), Some(sig)) = (f.get("pid").and_then(|v| v.parse().ok()), f.get("sig"))
+                && ["TERM", "KILL", "STOP", "CONT"].contains(&sig.as_str()) {
                     let _ = neontop_core::collectors::processes::send_signal(pid, sig);
                 }
-            }
         }
         _ => {}
     }

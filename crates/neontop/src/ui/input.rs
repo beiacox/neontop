@@ -37,8 +37,8 @@ pub fn bind_keys(cx: &mut App) {
 }
 
 pub enum InputEvent {
-    Changed(SharedString),
-    Submit(SharedString),
+    Changed,
+    Submit,
 }
 
 pub struct TextInput {
@@ -89,7 +89,7 @@ impl TextInput {
     }
 
     fn changed(&mut self, cx: &mut Context<Self>) {
-        cx.emit(InputEvent::Changed(self.content.clone()));
+        cx.emit(InputEvent::Changed);
         cx.notify();
     }
 
@@ -145,7 +145,7 @@ impl TextInput {
     }
 
     fn enter(&mut self, _: &Enter, _: &mut Window, cx: &mut Context<Self>) {
-        cx.emit(InputEvent::Submit(self.content.clone()));
+        cx.emit(InputEvent::Submit);
     }
 
     /// Escape vacía el campo (en la búsqueda es lo esperable).

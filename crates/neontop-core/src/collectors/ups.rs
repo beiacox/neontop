@@ -127,6 +127,12 @@ pub struct UpsCollector {
     latest: Arc<Mutex<Option<(UpsSnapshot, Instant)>>>,
 }
 
+impl Default for UpsCollector {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl UpsCollector {
     pub fn new() -> Self {
         let latest: Arc<Mutex<Option<(UpsSnapshot, Instant)>>> = Arc::new(Mutex::new(None));

@@ -87,6 +87,12 @@ impl Th {
         cx.global::<Th>()
     }
 
+    /// Tamaño para la fuente de títulos: VT323 (fuente de píxeles) se ve mucho más pequeña que el
+    /// resto al mismo tamaño, así que se agranda.
+    pub fn dsize(&self, size: f32) -> f32 {
+        if self.theme.style.display == "VT323" { size * 1.4 } else { size }
+    }
+
     pub fn slot(&self, s: Slot) -> Hsla {
         hex(self.theme.colors.slot(s))
     }

@@ -101,6 +101,12 @@ pub struct CpuCollector {
     temp_dir: Option<PathBuf>,
 }
 
+impl Default for CpuCollector {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl CpuCollector {
     pub fn new() -> Self {
         let mut c = CpuCollector {

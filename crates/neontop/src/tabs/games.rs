@@ -250,7 +250,7 @@ fn history(root: &Root, cx: &mut Context<Root>) -> impl IntoElement {
         .when(n > 0, |p| {
             p.child(cards)
                 .child(div().id("hist-table").overflow_x_scroll().child(div().min_w(px(1020.)).flex().flex_col().child(head).children(rows)))
-                .children(root.games.msg.clone().map(|m| crate::tabs::memory::notice_line(Some(m), cx)).flatten())
+                .children(root.games.msg.clone().and_then(|m| crate::tabs::memory::notice_line(Some(m), cx)))
                 .child(kit::muted(
                     "Pulsa un registro para ver la partida completa: FPS durante toda la partida, tirones, CPU, GPU, temperaturas, distribución de tiempos y la comparación con tus otras partidas. Se guarda en este equipo (las partidas, solas al cerrar el juego si duran más de 10 s).",
                     cx,
@@ -383,7 +383,7 @@ fn session_view(root: &mut Root, id: String, cx: &mut Context<Root>) -> AnyEleme
                 .flex_1()
                 .flex()
                 .flex_col()
-                .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(22.)).text_color(th.lime).child(b.title.clone()))
+                .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(th.dsize(22.))).text_color(th.lime).child(b.title.clone()))
                 .child(kit::muted(format!("{} · {} · {} · {} · {}", if b.is_bench() { "BENCHMARK" } else { "PARTIDA" }, fmt::datetime(b.date), fmt::duration(b.seconds), b.exe, b.api), cx)),
         )
         .when(b.is_bench() && detail.as_ref().is_some_and(|d| d.frametimes.is_some()), |d| d.child(kit::button("s-csv", "CSV", th.cyan, cx).on_click(cx.listener(move |this, _, _, cx| export_csv(this, bb.clone(), cx)))))
@@ -599,7 +599,7 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
             div()
                 .flex()
                 .flex_col()
-                .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(22.)).text_color(th.lime).child(info.title.clone()))
+                .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(th.dsize(22.))).text_color(th.lime).child(info.title.clone()))
                 .child(
                     div()
                         .flex()
@@ -726,7 +726,7 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
                 .flex_col()
                 .min_w(px(110.))
                 .child(kit::muted(th.title(&name), cx).text_size(px(9.5)))
-                .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(20.)).child(v))
+                .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(th.dsize(20.))).child(v))
                 .children(sub.map(|(s, c)| div().text_size(px(11.)).text_color(c).child(s)))
         };
         g = g.child(

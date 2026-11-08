@@ -40,6 +40,7 @@ const RTLD_DL_LINKMAP: c_int = 2;
 #[cfg(target_pointer_width = "64")]
 mod elf {
     pub type Addr = u64;
+    pub type Tag = i64;
     #[repr(C)]
     pub struct Sym {
         pub st_name: u32,
@@ -59,6 +60,7 @@ mod elf {
 #[cfg(target_pointer_width = "32")]
 mod elf {
     pub type Addr = u32;
+    pub type Tag = i32;
     #[repr(C)]
     pub struct Sym {
         pub st_name: u32,
@@ -75,13 +77,14 @@ mod elf {
     }
 }
 
-use elf::{Addr, Dyn, Sym};
+use elf::{Addr, Dyn, Sym, Tag};
 
-const DT_NULL: i64 = 0;
-const DT_STRTAB: i64 = 5;
-const DT_SYMTAB: i64 = 6;
-const DT_GNU_HASH: i64 = 0x6fff_fef5;
-const DT_VERSYM: i64 = 0x6fff_fff0;
+// mismo tipo que `Dyn::d_tag` en cada arquitectura (i64 en 64 bits, i32 en 32)
+const DT_NULL: Tag = 0;
+const DT_STRTAB: Tag = 5;
+const DT_SYMTAB: Tag = 6;
+const DT_GNU_HASH: Tag = 0x6fff_fef5;
+const DT_VERSYM: Tag = 0x6fff_fff0;
 const STT_GNU_IFUNC: u8 = 10;
 
 #[repr(C)]
@@ -163,8 +166,8 @@ unsafe fn elf_lookup(l: *const LinkMap, name: &[u8]) -> *mut c_void {
         let ptr = |v: Addr| if v < base { v.wrapping_add(base) } else { v } as usize;
         let (mut symtab, mut strtab, mut gnu, mut versym) = (core::ptr::null::<Sym>(), core::ptr::null::<u8>(), core::ptr::null::<u32>(), core::ptr::null::<u16>());
         let mut d = (*l).l_ld;
-        while (*d).d_tag as i64 != DT_NULL {
-            match (*d).d_tag as i64 {
+        while (*d).d_tag != DT_NULL {
+            match (*d).d_tag {
                 DT_SYMTAB => symtab = ptr((*d).d_val as Addr) as *const Sym,
                 DT_STRTAB => strtab = ptr((*d).d_val as Addr) as *const u8,
                 DT_GNU_HASH => gnu = ptr((*d).d_val as Addr) as *const u32,

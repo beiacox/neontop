@@ -390,7 +390,7 @@ fn detail(root: &Root, p: &ProcInfo, alive: bool, cpu_div: f32, all: &[ProcInfo]
                 .flex()
                 .items_baseline()
                 .gap(px(10.))
-                .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(17.)).text_color(th.load_color(cpu)).truncate().child(p.name.clone()))
+                .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(th.dsize(17.))).text_color(th.load_color(cpu)).truncate().child(p.name.clone()))
                 .child(kit::muted(format!("PID {pid}"), cx))
                 .when(!alive, |d| d.child(kit::badge("TERMINADO", th.red))),
         )

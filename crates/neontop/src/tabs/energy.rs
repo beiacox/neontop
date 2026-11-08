@@ -187,7 +187,7 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
                                 .flex()
                                 .flex_col()
                                 .child(kit::muted("CONSUMO DEL PUESTO", cx).text_size(px(9.5)))
-                                .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(26.)).text_color(scol).child(fmt::watts(Some(power))))
+                                .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(th.dsize(26.))).text_color(scol).child(fmt::watts(Some(power))))
                                 .child(kit::muted(format!("{} de {}{}", n(u.load_pct, 0, " %"), n(u.nominal_w, 0, " W"), step.map(|s| format!(" · resolución {s:.0} W")).unwrap_or_default()), cx)),
                         )
                         .child(
@@ -335,7 +335,7 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
                     .flex()
                     .items_center()
                     .gap(px(8.))
-                    .child(div().w(px(84.)).font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(18.)).text_color(color).child(fmt::watts(x.watts)))
+                    .child(div().w(px(84.)).font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(th.dsize(18.))).text_color(color).child(fmt::watts(x.watts)))
                     .child(div().flex_1().child(charts::sparkline(hv(st, &format!("energy.src.{}", x.id)), color, 28., None))),
             )
             .children(x.limit.map(|l| charts::meter((x.watts.unwrap_or(0.0) / l) as f32, color, 4.)))

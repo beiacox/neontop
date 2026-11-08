@@ -10,9 +10,8 @@
 </p>
 
 <p align="center">
-  <img alt="Tauri 2" src="https://img.shields.io/badge/Tauri-2-24C8DB?logo=tauri&logoColor=white">
-  <img alt="Svelte 5" src="https://img.shields.io/badge/Svelte-5-FF3E00?logo=svelte&logoColor=white">
-  <img alt="Rust" src="https://img.shields.io/badge/Rust-backend-000000?logo=rust">
+  <img alt="Rust" src="https://img.shields.io/badge/100%25-Rust-000000?logo=rust">
+  <img alt="GPUI" src="https://img.shields.io/badge/interfaz-GPUI-7c3aed">
   <img alt="Linux" src="https://img.shields.io/badge/Linux-x86__64-FCC624?logo=linux&logoColor=black">
   <img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-green">
 </p>
@@ -48,12 +47,12 @@
 
 Además:
 
-- **25 temas** (más uno que sigue al tema del sistema) en 5 categorías (clásicos, neón, terminal, editores, temáticos), cada uno con su paleta, tipografía, esquinas y efectos (brillo, CRT).
+- **24 temas** (más uno que sigue al modo claro/oscuro del escritorio) en 5 categorías (clásicos, neón, terminal, editores, temáticos), cada uno con su paleta, tipografía, esquinas y efectos (brillo, CRT).
 - **Muestreo configurable** de 100 ms a 60 s y ventana de historial de 1 minuto a **ilimitada**.
-- **Acceso web**: abre NeonTop desde el teléfono u otro equipo de la red (código QR, clave de acceso, acciones opcionales).
+- **Acceso web**: abre NeonTop desde el teléfono u otro equipo de la red (código QR, clave de acceso, acciones opcionales). Las páginas y sus gráficas SVG se generan en Rust en el propio equipo: el navegador no ejecuta JavaScript.
 - **Alertas** configurables (disco casi lleno, temperatura, SAI en batería…) con notificaciones del sistema.
 - **Bandeja del sistema**, arranque con la sesión, instancia única y exportación a CSV.
-- Interfaz **responsiva**: funciona igual en una pantalla de 2560 px que en un móvil.
+- Interfaz **nativa en la GPU** con [GPUI](https://gpui.rs) (el motor de Zed): ~40 MiB y un proceso, frente a los cientos de MiB y los procesos de WebKit de la versión anterior. Se adapta al ancho de la ventana (4, 2 o 1 columnas).
 - Todo en **español**.
 
 ## Capturas
@@ -67,20 +66,16 @@ Además:
 | ![Juegos](docs/screenshots/juegos.png) **Juegos** | ![Tema Synthwave](docs/screenshots/tema-synthwave.png) **Tema Synthwave** |
 | ![Tema claro](docs/screenshots/tema-claro.png) **Tema Catppuccin Latte** | ![Tema Matrix](docs/screenshots/tema-matrix.png) **Tema Matrix** |
 
-<p align="center">
-  <img src="docs/screenshots/movil.png" width="300" alt="Vista en el móvil"><br>
-  <em>Acceso web desde el teléfono</em>
-</p>
-
-> Las capturas están hechas con el modo demostración (datos simulados), ver [Desarrollo](#desarrollo).
+> Las capturas están hechas con el modo demostración (`neontop --demo`, datos simulados), ver [Desarrollo](#desarrollo).
 
 ## Medición de FPS en juegos
 
-NeonTop trae su propia capa de medición (parecida a MangoHud, en C, sin dependencias):
+NeonTop trae su propia capa de medición (parecida a MangoHud), escrita en Rust `no_std`: sin asignador ni inicialización, para no alterar el juego en el que se carga:
 
 - **Vulkan**: capa implícita (`libneontop_layer.so`) que solo se activa con `NEONTOP_FPS=1`. Cubre los juegos Vulkan nativos y todo **Proton/Wine** (DirectX vía DXVK y VKD3D).
 - **OpenGL** (GLX y EGL): librería precargada (`libneontop_gl.so`) que intercepta el intercambio de búferes. Convive con el overlay de Steam y con MangoHud.
-- 64 y 32 bits. Cada fotograma se anota en memoria compartida (`/dev/shm/neontop-fps-<pid>`) y NeonTop lo lee sin tocar el juego.
+- 64 y 32 bits. Cada fotograma se anota en memoria compartida (`/dev/shm/neontop-fps-<pid>`) y NeonTop lo lee sin tocar el juego. Con OpenGL sobre Vulkan (Zink) las dos librerías comparten estado y cada fotograma cuenta una sola vez.
+- El lanzador `neontop-fps` (también en Rust) activa la capa y, solo con OpenGL nativo, la precarga; con Proton/Wine no precarga nada en la cadena de procesos de Steam.
 
 ### Activación automática
 
@@ -115,67 +110,82 @@ El `PKGBUILD` de [`packaging/arch`](packaging/arch) compila dos paquetes (se exc
 | Paquete | Para |
 |---|---|
 | `neontop` | Cualquier PC x86-64 (genérico). |
-| `neontop-native` | Optimizado para la CPU donde se compila (`-march=native`). En otra CPU puede fallar con SIGILL. |
+| `neontop-native` | Optimizado para la CPU donde se compila (`target-cpu=native`). En otra CPU puede fallar con SIGILL. |
 
 ```sh
 git clone https://github.com/beiacox/neontop.git
 cd neontop/packaging/arch
+rustup target add i686-unknown-linux-gnu   # capa de FPS de 32 bits (o el paquete lib32-rust-libs)
 makepkg -f
 sudo pacman -U neontop-<versión>-x86_64.pkg.tar.zst
 ```
 
-Dependencias opcionales: `apcupsd` (SAI APC), `nvidia-utils` (GPU NVIDIA), `lm_sensors` (sensores de placa base) y `vulkan-icd-loader` (FPS en juegos Vulkan/Proton).
-
-### Otras distribuciones
-
-`npm run bundle` genera paquetes `.deb`, `.rpm` y AppImage con Tauri (la capa de FPS y el lector de tráfico de RAM se instalan aparte, ver el `PKGBUILD`).
+Necesita Vulkan (`vulkan-icd-loader` y el driver de tu GPU), que es con lo que GPUI dibuja. Opcionales: `apcupsd` (SAI APC), `nvidia-utils` (GPU NVIDIA), `lm_sensors` (sensores de placa base) y `lib32-vulkan-icd-loader` (FPS en juegos Vulkan de 32 bits).
 
 ## Compilar desde el código
 
-Requisitos: Rust estable, Node.js 20+ y las dependencias de Tauri 2 para Linux (`webkit2gtk-4.1`, `gtk3`, `libayatana-appindicator`). Para la capa de FPS: `gcc`, `vulkan-headers` y `lib32-glibc` (32 bits).
+Requisitos: Rust estable (1.88 o posterior), Vulkan y, para la capa de 32 bits, el objetivo `i686-unknown-linux-gnu` y `lib32-glibc`. No hace falta Node ni WebKit.
 
 ```sh
-npm ci
-npm run tauri dev                         # app de escritorio en modo desarrollo
-npm run tauri build -- --no-bundle        # binario de release en src-tauri/target/release/neontop
-make -C packaging/layer                   # capa de FPS (64 y 32 bits)
+cargo run -p neontop                                   # la aplicación (desarrollo)
+cargo run -p neontop -- --demo --tab games             # con datos simulados
+cargo build --release                                  # todo: interfaz, lanzador, lector de RAM y capas de 64 bits
+cargo build --release --target i686-unknown-linux-gnu -p neontop-layer -p neontop-gl   # capas de 32 bits
+cargo test --workspace                                 # pruebas
 ```
 
 ## Desarrollo
 
-- **Modo demostración**: `npm run dev` y abre `http://localhost:1420` en el navegador. Sin backend, [`src/lib/demo.ts`](src/lib/demo.ts) simula todos los datos (incluido un juego). Parámetros útiles: `?tab=games&theme=synthwave`.
-- **Comprobación de tipos**: `npm run check`.
-- **Tests del backend**: `cd src-tauri && cargo test`.
-- **Probar la capa de FPS sin instalar**: `VK_ADD_IMPLICIT_LAYER_PATH=<dir con el json> NEONTOP_FPS=1 vkcube`.
+- **Modo demostración**: `neontop --demo` simula un equipo completo con un juego en marcha ([`demo.rs`](crates/neontop-core/src/demo.rs), determinista). Argumentos: `--tab <id>` y `--theme <id>`; `NEONTOP_SIZE=1600x1000` fija el tamaño de la ventana.
+- **Pruebas**: `cargo test --workspace` (historial, estadísticas de FPS, energía, alertas, temas, procesos, servidor web, capa de FPS y su formato de memoria compartida…). `cargo clippy --workspace --all-targets` sin avisos.
+- **Capturas sin tocar tu escritorio**: [`tools/qa-shot.sh`](tools/qa-shot.sh) abre un KWin anidado con pantalla virtual, lanza NeonTop dentro y lo captura:
+  `dbus-run-session -- tools/qa-shot.sh captura.png 1600 1000 6 target/debug/neontop --demo --tab cpu`
+- **Probar la capa de FPS**: [`tools/qa-fps.sh`](tools/qa-fps.sh) hace lo mismo con un programa y lee su memoria compartida:
+  `dbus-run-session -- tools/qa-fps.sh 6 LD_PRELOAD=$PWD/target/debug/libneontop_gl.so -- glxgears`
 
 ## Arquitectura
 
+Espacio de trabajo de Cargo, todo en Rust:
+
 ```
-src/                     Interfaz (SvelteKit + Svelte 5, uPlot y ECharts)
-  lib/modules/           Una vista por pestaña
-  lib/charts/            Gráficas (series temporales, velocímetros, mapas de calor…)
-  lib/theme.ts           Temas
-src-tauri/src/           Backend (Rust)
-  collectors/            Lectura directa de /proc y /sys: cpu, memoria, red, discos, hwmon,
+crates/
+  neontop-core/          Sin interfaz: lo usan la ventana, la web y el ayudante root
+    collectors/          Lectura directa de /proc y /sys: cpu, memoria, red, discos, hwmon,
                          GPU (AMD/NVIDIA/Intel), energía, SAI, juegos, tráfico de RAM…
-  sampler.rs             Bucle de muestreo; emite un evento "metrics" por muestra
-  web.rs                 Servidor web (acceso desde el teléfono)
-  helper.rs              Acciones de administrador vía pkexec
-  launchers.rs           Medición de FPS automática en Steam/Heroic/Lutris/Prism
-  sessions.rs            Historial de partidas en disco
-packaging/
-  arch/                  PKGBUILD
-  layer/                 Capa de FPS (C): Vulkan + precarga OpenGL + lanzador neontop-fps
-  membw/                 Lector de contadores de tráfico de RAM (recibe CAP_PERFMON)
+    sampler.rs           Hilo de muestreo
+    history.rs           Historial de gráficas (compactación tipo RRD, sin límite de tiempo)
+    fps.rs               Estadísticas de juegos: 1 %/0,1 % bajos, tirones, estabilidad, benchmarks
+    energy_log.rs        Energía por día y hora, coste, consumo estimado por proceso
+    alerts.rs            Reglas de alerta con umbral, margen y silencio
+    theme.rs             Los 24 temas
+    model.rs             Todo lo anterior a partir de cada muestra
+    launchers.rs         Medición de FPS automática en Steam/Heroic/Lutris/Prism
+    helper.rs            Acciones de administrador vía pkexec
+  neontop/               La aplicación (GPUI)
+    app.rs               Ventana: barra lateral, cabecera, avisos, controles de ventana
+    tabs/                Una vista por pestaña
+    charts/              Gráficas dibujadas en la GPU (series, velocímetros, radar, calor…)
+    ui/                  Tema, componentes y campo de texto
+    settings.rs          Panel de Ajustes
+    web.rs               Interfaz web (HTML y SVG generados en Rust)
+    tray.rs              Bandeja (StatusNotifierItem por D-Bus)
+  neontop-fps-shm/       Formato de la memoria compartida de la capa de FPS (no_std)
+  neontop-layer/         Capa Vulkan implícita (cdylib no_std)
+  neontop-gl/            Precarga de OpenGL (cdylib no_std, dlsym en ensamblador)
+  neontop-fps/           Lanzador neontop-fps
+  neontop-membw/         Lector de contadores de tráfico de RAM (recibe CAP_PERFMON)
+assets/                  Fuentes (OFL) e iconos incluidos en el binario
+packaging/               PKGBUILD, manifiestos de la capa Vulkan, política polkit, .desktop
+tools/                   Capturas y pruebas de la capa en un KWin anidado
 ```
 
-El backend no usa `sysinfo`: lee `/proc` y `/sys` directamente, y las recogidas caras (procesos, GPU por proceso) solo se hacen con la vista que las necesita abierta. En release consume alrededor de un 5 % de un núcleo con muestreo de 1 s.
+No usa `sysinfo` ni un navegador embebido: lee `/proc` y `/sys` directamente, las recogidas caras (procesos, GPU por proceso) solo se hacen con la vista que las necesita abierta, y la ventana solo se repinta cuando hay datos nuevos (como mucho 4 veces por segundo).
 
 ## Permisos y privacidad
 
 - NeonTop funciona como usuario normal. Lo que necesita root (contadores RAPL, señales a procesos de otros usuarios, tráfico de RAM) se pide **solo cuando lo activas**, con `pkexec` y la política [`com.neontop.app.policy`](packaging/com.neontop.app.policy).
 - El servidor web está **desactivado por defecto**; al activarlo usa una clave aleatoria y las acciones (pausar, señales) son opcionales.
-- No envía nada a Internet. La configuración vive en `~/.config/com.neontop.app/` y el historial de partidas en `~/.local/share/com.neontop.app/`.
+- No envía nada a Internet. La configuración vive en `~/.config/com.neontop.app/` (`config.json`, `alerts.json`) y los datos en `~/.local/share/com.neontop.app/` (partidas, energía diaria, tests de RAM).
 
 ## Licencia
 

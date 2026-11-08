@@ -473,8 +473,7 @@ mod tests {
 
     #[test]
     fn feeds_the_whole_model() {
-        let mut d = Demo::default();
-        d.game_end = 30.0;
+        let mut d = Demo { game_end: 30.0, ..Default::default() };
         let mut m = Model::new(info(), false);
         let mut fired = 0;
         for i in 0..40u64 {

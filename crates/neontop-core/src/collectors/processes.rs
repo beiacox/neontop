@@ -78,15 +78,20 @@ fn read_io(pid: u32) -> (Option<u64>, Option<u64>) {
 
 /// Nombre legible: `comm` va truncado a 15 caracteres, así que si argv[0] empieza igual se usa su basename.
 fn pick_name(comm: &str, cmd: &str) -> String {
-    if comm.len() >= 15 {
-        if let Some(arg0) = cmd.split(' ').next() {
+    if comm.len() >= 15
+        && let Some(arg0) = cmd.split(' ').next() {
             let base = arg0.rsplit('/').next().unwrap_or(arg0);
             if base.starts_with(comm) {
                 return base.to_string();
             }
         }
-    }
     comm.to_string()
+}
+
+impl Default for ProcCollector {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl ProcCollector {
