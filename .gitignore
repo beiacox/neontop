@@ -1,20 +1,14 @@
-.DS_Store
-node_modules
-/build
-/.svelte-kit
-/package
-.env
-.env.*
-!.env.example
-vite.config.js.timestamp-*
-vite.config.ts.timestamp-*
+# Compilación de Rust (espacio de trabajo)
+/target
 
-# Rust / Tauri
+# Restos de la versión con Tauri/Svelte (rama main)
 /src-tauri/target
-/src-tauri/gen/schemas
-/packaging/membw/target
+/node_modules
+/.svelte-kit
+/build
+/src
 
-# Paquetes y compilación
+# Paquetes
 /packaging/layer/build
 /packaging/arch/pkg
 /packaging/arch/src
@@ -22,3 +16,5 @@ vite.config.ts.timestamp-*
 
 # Herramientas locales
 /.claude
+/.vscode
+.DS_Store
