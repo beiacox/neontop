@@ -4,7 +4,7 @@
 
 mod scale;
 
-pub use scale::{nice_max, ticks};
+pub use scale::{nice_max, nice_max_binary, ticks};
 
 use gpui::{
     canvas, div, fill, linear_color_stop, linear_gradient, point, prelude::*, px, size, App, Bounds, Hsla, PathBuilder, Pixels, Point, SharedString, TextRun,
@@ -93,11 +93,17 @@ pub struct Line {
     pub width: f32,
     pub fill: bool,
     pub dashed: bool,
+    /// Se dibuja hacia abajo (gráficas espejo: subida bajo el eje, bajada encima).
+    pub negate: bool,
 }
 
 impl Line {
     pub fn new(ys: Vec<f32>, color: Hsla) -> Self {
-        Line { ys, xs: Vec::new(), color, width: 1.6, fill: false, dashed: false }
+        Line { ys, xs: Vec::new(), color, width: 1.6, fill: false, dashed: false, negate: false }
+    }
+    pub fn negate(mut self) -> Self {
+        self.negate = true;
+        self
     }
     pub fn fill(mut self) -> Self {
         self.fill = true;
@@ -152,6 +158,8 @@ pub struct Plot {
     pub dots: Vec<(f64, f32, Hsla)>,
     /// Sin ejes ni rejilla (mini-gráficas).
     pub bare: bool,
+    /// Eje en bytes: máximo redondeado en unidades binarias.
+    pub binary: bool,
 }
 
 fn fmt_plain(v: f32) -> String {
@@ -181,6 +189,7 @@ impl Plot {
             vlines: Vec::new(),
             dots: Vec::new(),
             bare: false,
+            binary: false,
         }
     }
     pub fn height(mut self, h: f32) -> Self {
@@ -223,6 +232,11 @@ impl Plot {
         self.dots = d;
         self
     }
+    /// Eje de bytes (máximos en potencias de dos y rótulos en KiB/MiB/GiB).
+    pub fn bytes(mut self) -> Self {
+        self.binary = true;
+        self
+    }
     pub fn bare(mut self) -> Self {
         self.bare = true;
         self
@@ -230,7 +244,7 @@ impl Plot {
 
     /// Máximo del eje Y (redondeado) y series acumuladas si es apilada.
     fn prepare(&self) -> (f32, Vec<Vec<f32>>) {
-        let mut ys: Vec<Vec<f32>> = self.lines.iter().map(|l| l.ys.clone()).collect();
+        let mut ys: Vec<Vec<f32>> = self.lines.iter().map(|l| if l.negate { l.ys.iter().map(|v| -v).collect() } else { l.ys.clone() }).collect();
         if self.stacked {
             for i in 1..ys.len() {
                 let (prev, cur) = ys.split_at_mut(i);
@@ -239,9 +253,10 @@ impl Plot {
                 }
             }
         }
-        let data_max = ys.iter().flatten().copied().filter(|v| v.is_finite()).fold(0.0f32, f32::max);
+        let data_max = ys.iter().flatten().copied().filter(|v| v.is_finite()).fold(0.0f32, |a, v| a.max(v.abs()));
         let ref_max = self.hlines.iter().map(|h| h.0).fold(0.0f32, f32::max);
-        let max = self.y_max.unwrap_or_else(|| nice_max(data_max.max(ref_max * 1.05)));
+        let top = data_max.max(ref_max * 1.05);
+        let max = self.y_max.unwrap_or_else(|| if self.binary { nice_max_binary(top) } else { nice_max(top) });
         (max.max(self.y_min + 1e-6), ys)
     }
 
@@ -262,7 +277,9 @@ impl Plot {
         if w <= 2.0 || hgt <= 2.0 {
             return;
         }
-        let min = self.y_min;
+        // gráfica espejo: eje simétrico, el cero en medio
+        let mirrored = self.lines.iter().any(|l| l.negate);
+        let min = if mirrored { -max } else { self.y_min };
         let ymap = |v: f32| y1 - px(((v - min) / (max - min)).clamp(0.0, 1.0) * hgt);
 
         // abscisas: las de la gráfica o, si no hay, el índice
@@ -288,7 +305,7 @@ impl Plot {
             for v in ticks(min, max, 4) {
                 let y = ymap(v);
                 window.paint_quad(fill(Bounds::new(point(x0, y), size(x1 - x0, px(1.))), th.grid));
-                paint_text(window, cx, &(self.y_fmt)(v), point(x0 - px(6.), y - px(6.)), 9.5, th.muted, &mono, Align::Right);
+                paint_text(window, cx, &(self.y_fmt)(v.abs()), point(x0 - px(6.), y - px(6.)), 9.5, th.muted, &mono, Align::Right);
             }
             // rótulos del eje X
             let n_labels = ((w / 110.0) as usize).clamp(2, 8);
@@ -337,7 +354,8 @@ impl Plot {
                 if l.fill {
                     let lower = if self.stacked && i > 0 { Some(all[i - 1].as_slice()) } else { None };
                     let alpha = if self.stacked { (0.55, 0.35) } else { (0.32, 0.02) };
-                    area(window, &all[i], lower, y1, l.color, alpha);
+                    let base = if mirrored { ymap(0.0) } else { y1 };
+                    area(window, &all[i], lower, base, l.color, alpha);
                 }
             }
             for (i, l) in self.lines.iter().enumerate() {
@@ -474,6 +492,12 @@ pub fn heatmap(rows: Vec<Vec<f32>>, labels: Vec<String>, height: f32) -> impl In
     .h(px(height))
 }
 
+/// Medidor por bloques al estilo btop: `n` celdas, encendidas hasta `frac`.
+pub fn blocks(frac: f32, color: Hsla, n: usize, height: f32) -> impl IntoElement {
+    let on = (frac.clamp(0.0, 1.0) * n as f32).round() as usize;
+    div().flex_1().flex().gap(px(2.)).h(px(height)).children((0..n).map(move |i| div().flex_1().h_full().bg(if i < on { color } else { fade(color, 0.12) })))
+}
+
 /// Barra horizontal de porcentaje (medidores).
 pub fn meter(frac: f32, color: Hsla, height: f32) -> impl IntoElement {
     let f = frac.clamp(0.0, 1.0);
@@ -520,4 +544,195 @@ mod tests {
         assert_eq!(fmt_plain(0.25), "0.25");
         assert_eq!(fmt_plain(1.5), "1.5");
     }
+}
+
+/// Radar (perfil): ejes con su rótulo y valor 0–100.
+pub fn radar(axes: Vec<(String, f32)>, color: Hsla, height: f32) -> impl IntoElement {
+    canvas(
+        |_, _, _| (),
+        move |b, _, window, cx| {
+            let th = Th::get(cx).clone();
+            let n = axes.len().max(3);
+            let r = (f32::from(b.size.width.min(b.size.height)) / 2.0 - 26.0).max(10.0);
+            let c = point(b.origin.x + b.size.width / 2.0, b.origin.y + b.size.height / 2.0 + px(4.));
+            let at = |i: usize, f: f32| {
+                let a = (-90.0 + 360.0 * i as f32 / n as f32).to_radians();
+                point(c.x + px(r * f * a.cos()), c.y + px(r * f * a.sin()))
+            };
+            for k in 1..=4 {
+                let f = k as f32 / 4.0;
+                let mut ring: Vec<Point<Pixels>> = (0..n).map(|i| at(i, f)).collect();
+                ring.push(ring[0]);
+                stroke(window, &ring, 1.0, fade(th.cyan, 0.15), false);
+            }
+            for (i, (label, _)) in axes.iter().enumerate() {
+                stroke(window, &[c, at(i, 1.0)], 1.0, fade(th.cyan, 0.12), false);
+                let p = at(i, 1.16);
+                paint_text(window, cx, label, point(p.x, p.y - px(6.)), 10.0, th.muted, &th.mono, Align::Center);
+            }
+            let mut poly: Vec<Point<Pixels>> = axes.iter().enumerate().map(|(i, (_, v))| at(i, (v / 100.0).clamp(0.0, 1.0))).collect();
+            if poly.len() >= 3 {
+                let mut pb = PathBuilder::fill();
+                pb.move_to(poly[0]);
+                for p in &poly[1..] {
+                    pb.line_to(*p);
+                }
+                pb.close();
+                if let Ok(path) = pb.build() {
+                    window.paint_path(path, fade(color, 0.25));
+                }
+                poly.push(poly[0]);
+                stroke(window, &poly, 2.0, color, false);
+            }
+        },
+    )
+    .w_full()
+    .h(px(height))
+}
+
+/// Barras radiales: un sector por elemento (hilos de la CPU…) con longitud según su valor 0–100.
+pub fn polar(values: Vec<f32>, center: String, height: f32) -> impl IntoElement {
+    canvas(
+        |_, _, _| (),
+        move |b, _, window, cx| {
+            let th = Th::get(cx).clone();
+            let n = values.len().max(1);
+            let r = (f32::from(b.size.width.min(b.size.height)) / 2.0 - 16.0).max(10.0);
+            let r0 = r * 0.32;
+            let c = point(b.origin.x + b.size.width / 2.0, b.origin.y + b.size.height / 2.0);
+            let step = 360.0 / n as f32;
+            for (i, v) in values.iter().enumerate() {
+                let a0 = -90.0 + step * i as f32 + 1.5;
+                let a1 = a0 + step - 3.0;
+                let rr = r0 + (r - r0) * (v / 100.0).clamp(0.0, 1.0);
+                let mut ring = arc_points(c, r, a0, a1);
+                ring.extend(arc_points(c, r0, a1, a0));
+                let mut pb = PathBuilder::fill();
+                pb.add_polygon(&ring, true);
+                if let Ok(path) = pb.build() {
+                    window.paint_path(path, fade(th.cyan, 0.07));
+                }
+                let mut seg = arc_points(c, rr, a0, a1);
+                seg.extend(arc_points(c, r0, a1, a0));
+                let mut pb = PathBuilder::fill();
+                pb.add_polygon(&seg, true);
+                if let Ok(path) = pb.build() {
+                    window.paint_path(path, th.load_color(*v));
+                }
+                let lp = {
+                    let a = ((a0 + a1) / 2.0).to_radians();
+                    point(c.x + px((r + 8.0) * a.cos()), c.y + px((r + 8.0) * a.sin()) - px(5.))
+                };
+                paint_text(window, cx, &format!("C{i}"), lp, 8.5, th.muted, &th.mono, Align::Center);
+            }
+            paint_text(window, cx, &center, point(c.x, c.y - px(10.)), 16.0, th.text, &th.display, Align::Center);
+        },
+    )
+    .w_full()
+    .h(px(height))
+}
+
+/// Barras verticales con rótulo y, opcionalmente, una marca de máximo por barra.
+pub fn columns(values: Vec<(String, f32, Hsla)>, max: f32, marks: Vec<f32>, fmt: fn(f32) -> String, height: f32) -> impl IntoElement {
+    canvas(
+        |_, _, _| (),
+        move |b, _, window, cx| {
+            let th = Th::get(cx).clone();
+            let (left, bottom) = (44.0, 16.0);
+            let x0 = b.origin.x + px(left);
+            let y1 = b.origin.y + b.size.height - px(bottom);
+            let y0 = b.origin.y + px(6.);
+            let w = f32::from(b.size.width) - left;
+            let hgt = f32::from(y1 - y0);
+            let max = max.max(1e-6);
+            for v in ticks(0.0, max, 4) {
+                let y = y1 - px(v / max * hgt);
+                window.paint_quad(fill(Bounds::new(point(x0, y), size(px(w), px(1.))), th.grid));
+                paint_text(window, cx, &fmt(v), point(x0 - px(6.), y - px(6.)), 9.5, th.muted, &th.mono, Align::Right);
+            }
+            let n = values.len().max(1);
+            let bw = w / n as f32;
+            for (i, (label, v, color)) in values.iter().enumerate() {
+                let x = x0 + px(bw * i as f32 + bw * 0.18);
+                let h = (v / max).clamp(0.0, 1.0) * hgt;
+                let bar = Bounds::new(point(x, y1 - px(h)), size(px(bw * 0.64), px(h)));
+                window.paint_quad(fill(Bounds::new(point(x, y0), size(px(bw * 0.64), px(hgt))), fade(*color, 0.07)));
+                window.paint_quad(fill(bar, gpui::linear_gradient(180., gpui::linear_color_stop(*color, 0.), gpui::linear_color_stop(fade(*color, 0.45), 1.))));
+                if let Some(m) = marks.get(i) {
+                    let y = y1 - px((m / max).clamp(0.0, 1.0) * hgt);
+                    window.paint_quad(fill(Bounds::new(point(x, y), size(px(bw * 0.64), px(2.))), th.amber));
+                }
+                paint_text(window, cx, label, point(x + px(bw * 0.32), y1 + px(3.)), 9.0, th.muted, &th.mono, Align::Center);
+            }
+        },
+    )
+    .w_full()
+    .h(px(height))
+}
+
+/// Mapa de celdas (10 × 20): cada celda es 1/200 del total, coloreada por segmento.
+pub fn waffle(parts: Vec<(f32, Hsla)>, height: f32) -> impl IntoElement {
+    canvas(
+        |_, _, _| (),
+        move |b, _, window, cx| {
+            let th = Th::get(cx).clone();
+            let (cols, rows) = (20usize, 10usize);
+            let gap = 3.0;
+            let cw = (f32::from(b.size.width) - gap * (cols as f32 - 1.0)) / cols as f32;
+            let ch = (f32::from(b.size.height) - gap * (rows as f32 - 1.0)) / rows as f32;
+            let mut colors = Vec::with_capacity(cols * rows);
+            for (f, c) in &parts {
+                let n = (f.clamp(0.0, 1.0) * (cols * rows) as f32).round() as usize;
+                colors.extend(std::iter::repeat_n(*c, n));
+            }
+            for i in 0..cols * rows {
+                let (r, c) = (i / cols, i % cols);
+                let color = colors.get(i).copied().unwrap_or(fade(th.dim, 0.7));
+                let at = point(b.origin.x + px(c as f32 * (cw + gap)), b.origin.y + px(r as f32 * (ch + gap)));
+                window.paint_quad(fill(Bounds::new(at, size(px(cw), px(ch))), color).corner_radii(px(2.)));
+            }
+        },
+    )
+    .w_full()
+    .h(px(height))
+}
+
+/// Histograma con eje Y logarítmico: `bins` (cuenta, color) de ancho `step` (rótulos en el eje X).
+pub fn histogram(bins: Vec<(f32, Hsla)>, step: f32, unit: &'static str, height: f32) -> impl IntoElement {
+    canvas(
+        |_, _, _| (),
+        move |b, _, window, cx| {
+            let th = Th::get(cx).clone();
+            let (left, bottom) = (44.0, 16.0);
+            let x0 = b.origin.x + px(left);
+            let y1 = b.origin.y + b.size.height - px(bottom);
+            let y0 = b.origin.y + px(6.);
+            let w = f32::from(b.size.width) - left;
+            let hgt = f32::from(y1 - y0);
+            let max = bins.iter().map(|x| x.0).fold(1.0f32, f32::max);
+            let lmax = (max + 1.0).log10().max(0.1);
+            for k in 0..=(lmax.ceil() as i32) {
+                let v = 10f32.powi(k);
+                let y = y1 - px(((v + 1.0).log10() / lmax).min(1.0) * hgt);
+                window.paint_quad(fill(Bounds::new(point(x0, y), size(px(w), px(1.))), th.grid));
+                paint_text(window, cx, &crate::tabs::y_num(v), point(x0 - px(6.), y - px(6.)), 9.5, th.muted, &th.mono, Align::Right);
+            }
+            let n = bins.len().max(1);
+            let bw = w / n as f32;
+            for (i, (v, c)) in bins.iter().enumerate() {
+                if *v <= 0.0 {
+                    continue;
+                }
+                let h = ((v + 1.0).log10() / lmax).min(1.0) * hgt;
+                window.paint_quad(fill(Bounds::new(point(x0 + px(bw * i as f32), y1 - px(h)), size(px((bw * 0.9).max(1.0)), px(h))), *c));
+            }
+            let every = (n / 8).max(1);
+            for i in (0..n).step_by(every) {
+                let label = format!("{}{unit}", fmt_plain(step * i as f32));
+                paint_text(window, cx, &label, point(x0 + px(bw * i as f32), y1 + px(3.)), 9.0, th.muted, &th.mono, Align::Left);
+            }
+        },
+    )
+    .w_full()
+    .h(px(height))
 }

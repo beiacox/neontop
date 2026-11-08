@@ -174,6 +174,30 @@ impl History {
         (self.t.len(), self.t.first().copied().unwrap_or(0.0), bytes, self.series.len())
     }
 
+    /// CSV con los valores sin reducir desde `start` (una columna por serie, en el orden en que
+    /// aparecieron), con la hora local en la primera columna.
+    pub fn to_csv(&self, start: usize) -> String {
+        let mut keys: Vec<(&String, usize)> = self.index.iter().map(|(k, &i)| (k, i)).collect();
+        keys.sort_by_key(|&(_, i)| i);
+        let mut out = String::from("tiempo");
+        for (k, _) in &keys {
+            out.push(',');
+            out.push_str(k);
+        }
+        out.push('\n');
+        for row in start.min(self.t.len())..self.t.len() {
+            let ms = (self.t[row] * 1000.0) as u64;
+            out.push_str(&format!("{} {}", crate::format::day_key(ms), crate::format::clock(ms)));
+            for (_, i) in &keys {
+                let v = self.series[*i].get(row).copied().unwrap_or(0.0);
+                out.push(',');
+                if v.fract() == 0.0 { out.push_str(&format!("{v:.0}")) } else { out.push_str(&format!("{v}")) }
+            }
+            out.push('\n');
+        }
+        out
+    }
+
     pub fn clear(&mut self) {
         self.t.clear();
         for s in &mut self.series {
@@ -375,6 +399,20 @@ mod tests {
         assert_eq!(h.t()[0], 0.5);
         assert_eq!(*h.t().last().unwrap(), (MAX_POINTS - 1) as f64);
         assert!(h.t().windows(2).all(|w| w[0] < w[1]), "los instantes siguen ordenados");
+    }
+
+    #[test]
+    fn csv_export() {
+        let mut h = History::new();
+        sample(&mut h, 1_700_000_000.0, &[("a", 1.0)]);
+        sample(&mut h, 1_700_000_001.0, &[("a", 2.5), ("b", 3.0)]);
+        let csv = h.to_csv(0);
+        let lines: Vec<&str> = csv.lines().collect();
+        assert_eq!(lines[0], "tiempo,a,b");
+        assert_eq!(lines.len(), 3);
+        assert!(lines[1].ends_with(",1,0"));
+        assert!(lines[2].ends_with(",2.5,3"));
+        assert_eq!(h.to_csv(1).lines().count(), 2);
     }
 
     #[test]

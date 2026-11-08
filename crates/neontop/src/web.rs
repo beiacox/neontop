@@ -529,6 +529,64 @@ fn page(inner: &Inner, tab: &str, theme_id: &str, actions: bool) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::io::Write;
+    use std::net::TcpStream;
+
+    fn get(port: u16, path: &str, cookie: Option<&str>) -> String {
+        let mut s = TcpStream::connect(("127.0.0.1", port)).unwrap();
+        s.set_read_timeout(Some(std::time::Duration::from_secs(5))).unwrap();
+        let c = cookie.map(|c| format!("Cookie: {c}\r\n")).unwrap_or_default();
+        write!(s, "GET {path} HTTP/1.1\r\nHost: x\r\n{c}Connection: close\r\n\r\n").unwrap();
+        let mut out = String::new();
+        let _ = s.read_to_string(&mut out);
+        out
+    }
+
+    #[test]
+    fn server_requires_key_and_renders_pages() {
+        let dir = std::env::temp_dir().join(format!("neontop-web-{}", std::process::id()));
+        let cfg = Arc::new(ConfigStore::load(Some(dir.clone())));
+        let port = 47_000 + (std::process::id() % 2000) as u16;
+        cfg.update(|c| {
+            c.web_enabled = true;
+            c.web_port = port;
+            c.web_actions = true;
+        });
+        let token = cfg.get().web_token;
+        let (tx, _rx) = futures::channel::mpsc::unbounded();
+        let web = Web::new(cfg, Arc::new(Control::default()), tx, true);
+        web.apply();
+        assert!(web.status().running, "{:?}", web.status().error);
+        let mut demo = neontop_core::demo::Demo::default();
+        let p = web.publisher();
+        for i in 0..5 {
+            p.metrics(&Arc::new(demo.sample(1000, 1_700_000_000_000 + i * 1000)));
+        }
+        p.procs(&Arc::new(demo.procs()));
+
+        // sin clave: página de acceso
+        assert!(get(port, "/", None).starts_with("HTTP/1.1 401"));
+        assert!(get(port, "/?t=mala", None).starts_with("HTTP/1.1 401"));
+        // con la clave en el enlace: cookie y redirección sin la clave
+        let r = get(port, &format!("/?t={token}&tab=juegos"), None);
+        assert!(r.starts_with("HTTP/1.1 303"), "{r}");
+        assert!(r.contains(&format!("neontop={token}")) && r.contains("HttpOnly"));
+        assert!(r.contains("Location: /?tab=juegos"));
+        let cookie = format!("neontop={token}");
+        for tab in ["resumen", "procesos", "juegos", "energia"] {
+            let page = get(port, &format!("/?tab={tab}"), Some(&cookie));
+            assert!(page.starts_with("HTTP/1.1 200"), "{tab}: {page}");
+            assert!(page.contains("NEONTOP") && page.contains("</html>"), "{tab}");
+        }
+        assert!(get(port, "/?tab=juegos", Some(&cookie)).contains("Juego de demostración"));
+        assert!(get(port, "/?tab=procesos", Some(&cookie)).contains("firefox"));
+        let snap = get(port, "/api/snapshot", Some(&cookie));
+        assert!(snap.contains("\"cpu\"") && snap.contains("application/json"));
+        assert_eq!(web.status().clients, 1);
+        web.stop();
+        assert!(!web.status().running);
+        std::fs::remove_dir_all(dir).ok();
+    }
 
     #[test]
     fn helpers() {

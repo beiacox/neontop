@@ -22,6 +22,25 @@ pub fn nice_max(v: f32) -> f32 {
     nice * base
 }
 
+/// Como `nice_max` pero en unidades binarias (KiB, MiB, GiB…): el eje de bytes queda en
+/// 256 MiB, 512 MiB, 1 GiB… en lugar de 954 MiB.
+pub fn nice_max_binary(v: f32) -> f32 {
+    if !v.is_finite() || v <= 0.0 {
+        return 1.0;
+    }
+    let mut unit = 1.0f32;
+    while v / unit >= 1024.0 {
+        unit *= 1024.0;
+    }
+    let x = v / unit;
+    // potencias de dos para que los cuartos también sean cifras redondas
+    let mut n = 1.0f32;
+    while n < x {
+        n *= 2.0;
+    }
+    n * unit
+}
+
 /// `n + 1` marcas equiespaciadas de `min` a `max`.
 pub fn ticks(min: f32, max: f32, n: usize) -> Vec<f32> {
     let n = n.max(1);
@@ -44,6 +63,15 @@ mod tests {
         assert_eq!(nice_max(7.0), 10.0);
         assert!((nice_max(730.0) - 1000.0).abs() < 1e-3);
         assert!((nice_max(0.042) - 0.05).abs() < 1e-6);
+    }
+
+    #[test]
+    fn nice_binary() {
+        let mib = 1024.0 * 1024.0;
+        assert_eq!(nice_max_binary(900.0 * mib), 1024.0 * mib);
+        assert_eq!(nice_max_binary(300.0 * mib), 512.0 * mib);
+        assert_eq!(nice_max_binary(3.0 * 1024.0 * mib), 4.0 * 1024.0 * mib);
+        assert_eq!(nice_max_binary(0.0), 1.0);
     }
 
     #[test]

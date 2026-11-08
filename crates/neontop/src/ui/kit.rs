@@ -162,10 +162,12 @@ impl RenderOnce for Panel {
 /// Cifra destacada: etiqueta, valor grande, subtítulo y mini-gráfica opcional.
 pub fn stat(label: impl Into<SharedString>, value: impl Into<SharedString>, sub: impl Into<SharedString>, color: Hsla, spark: Option<Vec<f32>>, cx: &App) -> impl IntoElement {
     let th = Th::get(cx).clone();
+    let has_spark = spark.as_ref().is_some_and(|s| s.len() > 1);
     div()
         .relative()
         .flex()
         .flex_col()
+        .w_full()
         .min_w_0()
         .h(px(78.))
         .px(px(10.))
@@ -176,7 +178,7 @@ pub fn stat(label: impl Into<SharedString>, value: impl Into<SharedString>, sub:
         .rounded(px(th.radius.min(6.)))
         .child(div().text_size(px(9.5)).text_color(th.muted).font_family(th.mono.clone()).truncate().child(th.title(&label.into())))
         .child(div().text_size(px(21.)).font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_color(color).truncate().child(value.into()))
-        .child(div().text_size(px(10.)).text_color(th.muted).font_family(th.mono.clone()).truncate().child(sub.into()))
+        .child(div().text_size(px(10.)).text_color(th.muted).font_family(th.mono.clone()).truncate().when(has_spark, |d| d.mr(px(100.))).child(sub.into()))
         .children(spark.filter(|s| s.len() > 1).map(|s| div().absolute().right(px(6.)).bottom(px(6.)).w(px(96.)).h(px(26.)).child(charts::sparkline(s, color, 26., None))))
 }
 
@@ -313,16 +315,17 @@ pub fn kv(label: impl Into<SharedString>, value: impl Into<SharedString>, cx: &A
     let th = Th::get(cx).clone();
     div()
         .flex()
-        .justify_between()
+        .items_baseline()
         .gap(px(12.))
+        .min_w_0()
         .text_size(px(11.5))
-        .child(div().text_color(th.muted).flex_shrink_0().child(th.title(&label.into())).text_size(px(10.)).font_family(th.mono.clone()))
-        .child(div().font_family(th.mono.clone()).truncate().child(value.into()))
+        .child(div().w(px(96.)).text_color(th.muted).flex_shrink_0().child(th.title(&label.into())).text_size(px(10.)).font_family(th.mono.clone()))
+        .child(div().flex_1().min_w_0().font_family(th.mono.clone()).truncate().child(value.into()))
 }
 
 /// Lista de pares en dos columnas.
-pub fn kv_grid(items: Vec<(String, String)>, cx: &App) -> impl IntoElement {
-    let two = cols(cx) > 1 && items.len() > 4;
+pub fn kv_grid(items: Vec<(String, String)>, two: bool, cx: &App) -> impl IntoElement {
+    let two = two && cols(cx) > 1;
     div().grid().grid_cols(if two { 2 } else { 1 }).gap_x(px(18.)).gap_y(px(4.)).children(items.into_iter().map(|(k, v)| kv(k, v, cx)))
 }
 
@@ -333,7 +336,7 @@ pub fn badge(s: impl Into<SharedString>, color: Hsla) -> impl IntoElement {
 
 /// Leyenda: punto de color + texto.
 pub fn legend(items: Vec<(String, Hsla)>) -> impl IntoElement {
-    div().flex().flex_wrap().gap_x(px(10.)).gap_y(px(2.)).children(
+    div().flex().gap_x(px(10.)).children(
         items.into_iter().map(|(s, c)| div().flex().items_center().gap(px(4.)).child(div().size(px(7.)).rounded(px(2.)).bg(c)).child(div().text_color(c).child(s))),
     )
 }

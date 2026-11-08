@@ -76,7 +76,8 @@ pub struct AppState {
     /// Vistas que piden cada recogida cara ("procs" / "gpu_procs").
     wants: HashSet<(&'static str, &'static str)>,
     pub fps_auto: Option<FpsAuto>,
-    pub membench: Option<MemBench>,
+    /// Resultados del test de RAM (el último al final), guardados en disco.
+    pub membench: Vec<MemBench>,
     pub membench_running: bool,
     /// Último mensaje de una acción (permisos RAPL, tráfico de RAM, Steam…).
     pub notice: Option<Notice>,
@@ -216,6 +217,39 @@ impl AppState {
         }
     }
 
+    /// Test de ancho de banda de la RAM (~1–2 s de carga, en segundo plano).
+    pub fn run_membench(&mut self, cx: &mut Context<Self>) {
+        if self.membench_running {
+            return;
+        }
+        self.membench_running = true;
+        cx.notify();
+        let demo = self.demo;
+        self.run_action(
+            cx,
+            move || {
+                if demo {
+                    std::thread::sleep(Duration::from_millis(800));
+                    return Ok(MemBench { read: 41e9, write: 19e9, copy: 20e9, read_single: 27e9, latency_ns: 78.0, threads: 12, buffer_bytes: 512 << 20, duration_ms: 1200.0, ts: neontop_core::format::now_ms() });
+                }
+                Ok(neontop_core::collectors::membench::run())
+            },
+            |s, r: Result<MemBench, String>| {
+                s.membench_running = false;
+                if let Ok(b) = r {
+                    s.membench.push(b);
+                    let keep = s.membench.len().saturating_sub(30);
+                    s.membench.drain(..keep);
+                    if !s.demo {
+                        if let Some(d) = neontop_core::paths::data_dir() {
+                            let _ = neontop_core::paths::write_json(&d.join("membench.json"), &s.membench);
+                        }
+                    }
+                }
+            },
+        );
+    }
+
     /// Vuelve a leer el estado de la medición automática de FPS (lectura de ficheros: en segundo plano).
     pub fn refresh_fps_auto(&mut self, cx: &mut Context<Self>) {
         let cfg = self.cfg.clone();
@@ -268,7 +302,7 @@ pub fn init(cx: &mut App, demo: bool) -> (Entity<AppState>, UnboundedSender<Msg>
         pending: false,
         wants: HashSet::new(),
         fps_auto: None,
-        membench: None,
+        membench: if demo { Vec::new() } else { neontop_core::paths::data_dir().map(|d| neontop_core::paths::read_json(&d.join("membench.json"))).unwrap_or_default() },
         membench_running: false,
         notice: None,
         tx: tx.clone(),

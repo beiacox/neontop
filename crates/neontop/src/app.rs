@@ -33,6 +33,7 @@ pub const TABS: [(&str, &str, &str); 10] = [
 fn wants_of(tab: &str) -> (bool, bool) {
     match tab {
         "procs" => (true, true),
+        "overview" => (true, false),
         "gpu" => (false, true),
         "energy" | "games" => (true, true),
         _ => (false, false),
@@ -46,8 +47,14 @@ pub struct Root {
     pub games: tabs::games::GamesView,
     pub energy: tabs::energy::EnergyView,
     pub net_sel: Option<String>,
+    pub net_virtual: bool,
+    /// Totales de cada interfaz la primera vez que se vio (tráfico de la sesión).
+    pub net_base: std::collections::HashMap<String, (u64, u64)>,
     pub disk_sel: Option<String>,
+    pub disk_virtual: bool,
     pub gpu_sel: usize,
+    /// Procesos en la GPU ordenados por uso (si no, por memoria).
+    pub gpu_sort_busy: bool,
     scroll: ScrollHandle,
     _subs: Vec<Subscription>,
 }
@@ -63,8 +70,12 @@ impl Root {
             games: tabs::games::GamesView::default(),
             energy: tabs::energy::EnergyView::default(),
             net_sel: None,
+            net_virtual: false,
+            net_base: Default::default(),
             disk_sel: None,
+            disk_virtual: false,
             gpu_sel: 0,
+            gpu_sort_busy: false,
             scroll: ScrollHandle::new(),
             _subs: subs,
         };
@@ -568,7 +579,13 @@ pub fn show_main_window(cx: &mut App) {
         cx.new(|cx| Root::new(window, cx))
     }) {
         Ok(h) => {
-            let _ = h.update(cx, |_, window, _| window.activate_window());
+            let _ = h.update(cx, |root, window, cx| {
+                window.activate_window();
+                // revisión visual: abrir Ajustes directamente
+                if std::env::var_os("NEONTOP_QA_SETTINGS").is_some() {
+                    root.open_settings(window, cx);
+                }
+            });
         }
         Err(e) => eprintln!("NeonTop: no se pudo abrir la ventana: {e}"),
     }
