@@ -1,6 +1,7 @@
 //! Red: interfaces (elegir una), velocidades, picos, tráfico de la sesión, paquetes, uso del
 //! enlace, reparto del tráfico y sockets.
 
+use neontop_core::t;
 use gpui::{div, prelude::*, px, AnyElement, Context, SharedString, Window};
 use neontop_core::format as fmt;
 
@@ -77,27 +78,27 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
                 .child(div().font_family(th.mono.clone()).text_size(px(10.5)).text_color(th.cyan).child(format!("▼{}", fmt::rate(i.rx_rate))))
                 .child(div().font_family(th.mono.clone()).text_size(px(10.5)).text_color(th.magenta).child(format!("▲{}", fmt::rate(i.tx_rate))))
         }))
-        .child(kit::toggle("net-virtual", show_virtual, "mostrar virtuales", cx, cx.listener(|this, _, _, cx| {
+        .child(kit::toggle("net-virtual", show_virtual, t!("mostrar virtuales"), cx, cx.listener(|this, _, _, cx| {
             this.net_virtual = !this.net_virtual;
             cx.notify();
         })));
 
     let mut g = kit::grid(cx).child(chips);
     if let Some(i) = sel.clone() {
-        let k = |n: &str| format!("net.{}.{n}", i.name);
+        let k = |n: &str| format!("net.{}.{}", i.name, n);
         let w = st.window();
         let peak = |key: &str| st.model.history.raw(key, w).iter().copied().fold(0.0f32, f32::max) as f64;
         let (brx, btx) = root.net_base.get(&i.name).copied().unwrap_or((i.rx_total, i.tx_total));
         let errs = i.rx_errs + i.tx_errs;
         let stats = vec![
-            kit::stat("Bajada", fmt::rate(i.rx_rate), fmt::bits(i.rx_rate), th.cyan, Some(hv(st, &k("rx"))), cx).into_any_element(),
-            kit::stat("Subida", fmt::rate(i.tx_rate), fmt::bits(i.tx_rate), th.magenta, Some(hv(st, &k("tx"))), cx).into_any_element(),
-            kit::stat("Pico bajada", fmt::rate(peak(&k("rx"))), "en la ventana", th.cyan, None, cx).into_any_element(),
-            kit::stat("Pico subida", fmt::rate(peak(&k("tx"))), "en la ventana", th.magenta, None, cx).into_any_element(),
-            kit::stat("Sesión ▼", fmt::bytes(i.rx_total.saturating_sub(brx) as f64), format!("desde arranque {}", fmt::bytes(i.rx_total as f64)), th.teal, None, cx).into_any_element(),
-            kit::stat("Sesión ▲", fmt::bytes(i.tx_total.saturating_sub(btx) as f64), format!("desde arranque {}", fmt::bytes(i.tx_total as f64)), th.violet, None, cx).into_any_element(),
-            kit::stat("Paquetes/s", format!("{} / {}", fmt::num(i.rx_pkt_rate), fmt::num(i.tx_pkt_rate)), "entrada / salida", th.lime, Some(hv(st, &k("rxp"))), cx).into_any_element(),
-            kit::stat("Errores", errs.to_string(), format!("descartes {}", i.rx_drop + i.tx_drop), if errs > 0 { th.red } else { th.muted }, None, cx).into_any_element(),
+            kit::stat(t!("Bajada"), fmt::rate(i.rx_rate), fmt::bits(i.rx_rate), th.cyan, Some(hv(st, &k("rx"))), cx).into_any_element(),
+            kit::stat(t!("Subida"), fmt::rate(i.tx_rate), fmt::bits(i.tx_rate), th.magenta, Some(hv(st, &k("tx"))), cx).into_any_element(),
+            kit::stat(t!("Pico bajada"), fmt::rate(peak(&k("rx"))), t!("en la ventana"), th.cyan, None, cx).into_any_element(),
+            kit::stat(t!("Pico subida"), fmt::rate(peak(&k("tx"))), t!("en la ventana"), th.magenta, None, cx).into_any_element(),
+            kit::stat(t!("Sesión ▼"), fmt::bytes(i.rx_total.saturating_sub(brx) as f64), t!("desde arranque {}", fmt::bytes(i.rx_total as f64)), th.teal, None, cx).into_any_element(),
+            kit::stat(t!("Sesión ▲"), fmt::bytes(i.tx_total.saturating_sub(btx) as f64), t!("desde arranque {}", fmt::bytes(i.tx_total as f64)), th.violet, None, cx).into_any_element(),
+            kit::stat(t!("Paquetes/s"), format!("{} / {}", fmt::num(i.rx_pkt_rate), fmt::num(i.tx_pkt_rate)), t!("entrada / salida"), th.lime, Some(hv(st, &k("rxp"))), cx).into_any_element(),
+            kit::stat(t!("Errores"), errs.to_string(), t!("descartes {}", i.rx_drop + i.tx_drop), if errs > 0 { th.red } else { th.muted }, None, cx).into_any_element(),
         ];
         let bw = vec![Line::new(hv(st, &k("rx")), th.cyan).fill().width(2.), Line::new(hv(st, &k("tx")), th.magenta).fill().width(2.).negate()];
         let pk = vec![Line::new(hv(st, &k("rxp")), th.lime).fill(), Line::new(hv(st, &k("txp")), th.amber).fill().negate()];
@@ -118,34 +119,34 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
         g = g
             .child(kit::stats_row(stats, cx))
             .child(
-                Panel::new(format!("Ancho de banda · {}", i.name), th.cyan)
+                Panel::new(t!("Ancho de banda · {}", i.name), th.cyan)
                     .span(3)
-                    .extra(kit::legend(vec![("▼ bajada".into(), th.cyan), ("▲ subida".into(), th.magenta)]))
+                    .extra(kit::legend(vec![(t!("▼ bajada").into(), th.cyan), (t!("▲ subida").into(), th.magenta)]))
                     .child(Plot::new(bw, t.clone()).y_fmt(y_rate).bytes().height(260.).into_element()),
             )
-            .child(Panel::new("Interfaz", th.blue).child(kit::kv_grid(
+            .child(Panel::new(t!("Interfaz"), th.blue).child(kit::kv_grid(
                 vec![
-                    ("Tipo".into(), i.kind.clone()),
-                    ("Estado".into(), i.state.clone()),
-                    ("MAC".into(), if i.mac.is_empty() { "—".into() } else { i.mac.clone() }),
-                    ("MTU".into(), i.mtu.to_string()),
-                    ("Enlace".into(), i.speed.map(|s| format!("{s} Mbps")).unwrap_or("—".into())),
-                    ("IPs".into(), if i.addrs.is_empty() { "—".into() } else { i.addrs.join(", ") }),
+                    (t!("Tipo").into(), i.kind.clone()),
+                    (t!("Estado").into(), i.state.clone()),
+                    (t!("MAC").into(), if i.mac.is_empty() { "—".into() } else { i.mac.clone() }),
+                    (t!("MTU").into(), i.mtu.to_string()),
+                    (t!("Enlace").into(), i.speed.map(|s| format!("{s} Mbps")).unwrap_or("—".into())),
+                    (t!("IPs").into(), if i.addrs.is_empty() { "—".into() } else { i.addrs.join(", ") }),
                 ],
                 false,
                 cx,
             )))
-            .child(Panel::new("Paquetes por segundo", th.lime).span(2).child(Plot::new(pk, t.clone()).y_fmt(y_num).height(200.).into_element()))
-            .child(Panel::new("Uso del enlace", th.cyan).child(charts::gauge(
+            .child(Panel::new(t!("Paquetes por segundo"), th.lime).span(2).child(Plot::new(pk, t.clone()).y_fmt(y_num).height(200.).into_element()))
+            .child(Panel::new(t!("Uso del enlace"), th.cyan).child(charts::gauge(
                 link_frac,
                 th.cyan,
-                if i.speed.is_some() { fmt::pct(link_frac as f64 * 100.0, 1) } else { "N/D".into() },
-                i.speed.map(|s| format!("de {s} Mbps")).unwrap_or("velocidad desconocida".into()),
-                "ENLACE".into(),
+                if i.speed.is_some() { fmt::pct(link_frac as f64 * 100.0, 1) } else { t!("N/D").into() },
+                i.speed.map(|s| t!("de {} Mbps", s)).unwrap_or(t!("velocidad desconocida").into()),
+                t!("ENLACE").into(),
                 210.,
             )))
             .child(
-                Panel::new("Tráfico", th.magenta).extra("de la sesión, por interfaz").child(charts::ring(
+                Panel::new(t!("Tráfico"), th.magenta).extra(t!("de la sesión, por interfaz")).child(charts::ring(
                     traffic.iter().enumerate().map(|(k, x)| ((x.1 / ttotal.max(1.0)) as f32, th.series(k))).collect(),
                     fmt::bytes(ttotal),
                     "total".into(),
@@ -194,8 +195,8 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
         .flex()
         .flex_col()
         .gap(px(8.))
-        .child(kit::stat("TCP establecidos", s.net.tcp_established.to_string(), "", th.cyan, None, cx))
-        .child(kit::stat("TCP escuchando", s.net.tcp_listen.to_string(), "", th.lime, None, cx))
-        .child(kit::stat("UDP", s.net.udp_sockets.to_string(), "", th.amber, None, cx));
-    g.child(Panel::new("Todas las interfaces", th.teal).span(3).child(cards)).child(Panel::new("Sockets", th.violet).child(sockets)).into_any_element()
+        .child(kit::stat(t!("TCP establecidos"), s.net.tcp_established.to_string(), "", th.cyan, None, cx))
+        .child(kit::stat(t!("TCP escuchando"), s.net.tcp_listen.to_string(), "", th.lime, None, cx))
+        .child(kit::stat(t!("UDP"), s.net.udp_sockets.to_string(), "", th.amber, None, cx));
+    g.child(Panel::new(t!("Todas las interfaces"), th.teal).span(3).child(cards)).child(Panel::new(t!("Sockets"), th.violet).child(sockets)).into_any_element()
 }

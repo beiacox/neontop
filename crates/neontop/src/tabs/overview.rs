@@ -1,6 +1,7 @@
 //! Resumen: velocímetros de CPU, RAM, swap y temperatura; historial de CPU, memoria, red y
 //! discos; núcleos, presión, carga, temperaturas y los procesos que más gastan.
 
+use neontop_core::t;
 use gpui::{div, prelude::*, px, AnyElement, Context, Window};
 use neontop_core::format as fmt;
 use neontop_core::history::mem_segments;
@@ -71,7 +72,7 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
             .child(div().w(px(110.)).flex().justify_end().text_color(color).child(format!("{:>3.0}% {}", c.usage, fmt::freq(*s.cpu.freqs.get(i).unwrap_or(&0.0) as f64))))
     }));
 
-    let psi = [("CPU", s.pressure.cpu.some, th.cyan), ("MEM", s.pressure.memory.some, th.magenta), ("I/O", s.pressure.io.some, th.amber)];
+    let psi = [(t!("CPU"), s.pressure.cpu.some, th.cyan), (t!("MEM"), s.pressure.memory.some, th.magenta), ("I/O", s.pressure.io.some, th.amber)];
     let psi_rows = div().flex().flex_col().gap(px(6.)).children(psi.into_iter().map(|(l, v, c)| {
         div()
             .flex()
@@ -123,73 +124,73 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
     };
 
     kit::grid(cx)
-        .child(gauge("CPU", th.load_color(s.cpu.total.usage), s.cpu.total.usage / 100.0, fmt::pct(s.cpu.total.usage as f64, 0), fmt::freq(freq_avg as f64), "USO"))
-        .child(gauge("Memoria", th.magenta, mem_pct / 100.0, fmt::pct(mem_pct as f64, 0), fmt::bytes_of(seg.used as f64, s.mem.total as f64), "RAM"))
+        .child(gauge(t!("CPU"), th.load_color(s.cpu.total.usage), s.cpu.total.usage / 100.0, fmt::pct(s.cpu.total.usage as f64, 0), fmt::freq(freq_avg as f64), t!("USO")))
+        .child(gauge(t!("Memoria"), th.magenta, mem_pct / 100.0, fmt::pct(mem_pct as f64, 0), fmt::bytes_of(seg.used as f64, s.mem.total as f64), t!("RAM")))
         .child(gauge(
-            "Swap",
+            t!("Swap"),
             th.violet,
             swap_pct / 100.0,
-            if s.mem.swap_total > 0 { fmt::pct(swap_pct as f64, 0) } else { "N/D".into() },
+            if s.mem.swap_total > 0 { fmt::pct(swap_pct as f64, 0) } else { t!("N/D").into() },
             fmt::bytes_of(swap_used as f64, s.mem.swap_total as f64),
-            "SWAP",
+            t!("SWAP"),
         ))
         .child(gauge(
-            "Temp. CPU",
+            t!("Temp. CPU"),
             th.temp_color(temp),
             temp / 100.0,
-            s.cpu.temp.map(|t| format!("{t:.1}°")).unwrap_or("N/D".into()),
+            s.cpu.temp.map(|t| format!("{t:.1}°")).unwrap_or(t!("N/D").into()),
             s.cpu.temps.iter().map(|t| format!("{} {:.0}°", t.label, t.celsius)).collect::<Vec<_>>().join("  "),
             "°C",
         ))
-        .child(Panel::new("Historial CPU", th.cyan).span(2).extra("user · system · iowait").child(Plot::new(cpu_lines, t.clone()).stacked().y_max(100.).y_fmt(y_pct).height(200.).into_element()))
-        .child(Panel::new("Núcleos", th.lime).span(2).extra(format!("{} físicos · {} hilos", info.physical_cores, info.logical_cores)).child(cores))
+        .child(Panel::new(t!("Historial CPU"), th.cyan).span(2).extra(t!("user · system · iowait")).child(Plot::new(cpu_lines, t.clone()).stacked().y_max(100.).y_fmt(y_pct).height(200.).into_element()))
+        .child(Panel::new(t!("Núcleos"), th.lime).span(2).extra(t!("{} físicos · {} hilos", info.physical_cores, info.logical_cores)).child(cores))
         .child(
-            Panel::new("Memoria", th.magenta)
+            Panel::new(t!("Memoria"), th.magenta)
                 .span(2)
-                .extra("apps · shmem · buffers · caché")
+                .extra(t!("apps · shmem · buffers · caché"))
                 .child(Plot::new(mem_lines, t.clone()).stacked().y_max(s.mem.total as f32).y_fmt(y_bytes).bytes().height(200.).into_element()),
         )
         .child(
-            Panel::new("Red", th.teal)
+            Panel::new(t!("Red"), th.teal)
                 .span(2)
                 .extra(kit::legend(vec![(format!("▼ {}", fmt::rate(rx_now)), th.cyan), (format!("▲ {}", fmt::rate(tx_now)), th.magenta)]))
                 .child(Plot::new(net_lines, t.clone()).y_fmt(y_rate).bytes().height(200.).into_element()),
         )
         .child(
-            Panel::new("Presión (PSI)", th.amber)
-                .extra("avg10 · some")
+            Panel::new(t!("Presión (PSI)"), th.amber)
+                .extra(t!("avg10 · some"))
                 .child(psi_rows)
-                .child(kit::muted("% de tiempo en que alguna tarea estuvo esperando por el recurso.", cx)),
+                .child(kit::muted(t!("% de tiempo en que alguna tarea estuvo esperando por el recurso."), cx)),
         )
         .child(
-            Panel::new("Carga media", th.lime)
+            Panel::new(t!("Carga media"), th.lime)
                 .extra(s.cpu.load_avg.iter().map(|l| format!("{l:.2}")).collect::<Vec<_>>().join(" · "))
                 .child(Plot::new(load_lines, t.clone()).height(150.).into_element()),
         )
         .child(
-            Panel::new("Sistema", th.blue).span(2).child(kit::kv_grid(
+            Panel::new(t!("Sistema"), th.blue).span(2).child(kit::kv_grid(
                 vec![
-                    ("Host".into(), info.hostname.clone()),
-                    ("SO".into(), info.os.clone()),
-                    ("Kernel".into(), info.kernel.clone()),
-                    ("CPU".into(), info.cpu_model.clone()),
-                    ("Procesos".into(), format!("{} total · {} ejecutando · {} bloqueados", s.cpu.procs_total, s.cpu.procs_running, s.cpu.procs_blocked)),
-                    ("Sockets".into(), format!("{} TCP establecidos · {} escuchando · {} UDP", s.net.tcp_established, s.net.tcp_listen, s.net.udp_sockets)),
+                    (t!("Host").into(), info.hostname.clone()),
+                    (t!("SO").into(), info.os.clone()),
+                    (t!("Kernel").into(), info.kernel.clone()),
+                    (t!("CPU").into(), info.cpu_model.clone()),
+                    (t!("Procesos").into(), t!("{} total · {} ejecutando · {} bloqueados", s.cpu.procs_total, s.cpu.procs_running, s.cpu.procs_blocked)),
+                    (t!("Sockets").into(), t!("{} TCP establecidos · {} escuchando · {} UDP", s.net.tcp_established, s.net.tcp_listen, s.net.udp_sockets)),
                 ],
                 true,
                 cx,
             )),
         )
         .child(
-            Panel::new("Discos", th.amber)
+            Panel::new(t!("Discos"), th.amber)
                 .span(2)
                 .extra(kit::legend(vec![(format!("▼ {}", fmt::rate(r_now)), th.cyan), (format!("▲ {}", fmt::rate(w_now)), th.magenta)]))
                 .child(Plot::new(disk_lines, t.clone()).y_fmt(y_rate).bytes().height(180.).into_element()),
         )
-        .child(Panel::new("Temperaturas", th.red).span(2).child(temp_rows))
+        .child(Panel::new(t!("Temperaturas"), th.red).span(2).child(temp_rows))
         .when(!procs.procs.is_empty(), |g| {
             g.child(
-                Panel::new("Top procesos", th.lime).span(4).extra("por CPU (% de un núcleo) · por memoria").child(
+                Panel::new(t!("Top procesos"), th.lime).span(4).extra(t!("por CPU (% de un núcleo) · por memoria")).child(
                     div().grid().grid_cols(if kit::cols(cx) >= 2 { 2 } else { 1 }).gap(px(24.)).child(top(false)).child(top(true)),
                 ),
             )

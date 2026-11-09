@@ -49,6 +49,8 @@ pub struct UiSettings {
     /// Precio de la electricidad por kWh y símbolo de moneda.
     pub price: f64,
     pub currency: String,
+    /// Idioma de la interfaz (código: "es", "en"…); `None` = el del sistema.
+    pub lang: Option<String>,
 }
 
 impl Default for UiSettings {
@@ -64,6 +66,7 @@ impl Default for UiSettings {
             admin_actions: false,
             price: 0.15,
             currency: "$".into(),
+            lang: None,
         }
     }
 }

@@ -1,6 +1,7 @@
 //! Sensores: temperaturas (mapa térmico, barras, historial), cada chip con sus lecturas,
 //! ventiladores, potencia y baterías.
 
+use neontop_core::t;
 use gpui::{div, prelude::*, px, AnyElement, Context, Hsla, Window};
 use neontop_core::collectors::sensors::{Chip, Reading};
 
@@ -13,7 +14,7 @@ use crate::ui::theme::Th;
 fn unit(kind: &str) -> &'static str {
     match kind {
         "temp" => "°C",
-        "fan" => " RPM",
+        "fan" => t!(" RPM"),
         "in" => " V",
         "power" => " W",
         "curr" => " A",
@@ -80,14 +81,14 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
     let fans: Vec<(&Chip, &Reading)> = chips.iter().flat_map(|c| c.readings.iter().filter(|r| r.kind == "fan").map(move |r| (c, r))).collect();
     let power: Vec<(&Chip, &Reading)> = chips.iter().flat_map(|c| c.readings.iter().filter(|r| r.kind == "power").map(move |r| (c, r))).collect();
     let has_board = chips.iter().any(|c| c.category == "board");
-    let deg = |r: &Option<Reading>| r.as_ref().map(|r| format!("{:.1}°C", r.value)).unwrap_or("N/D".into());
+    let deg = |r: &Option<Reading>| r.as_ref().map(|r| format!("{:.1}°C", r.value)).unwrap_or(t!("N/D").into());
 
     let mut stats = vec![
-        kit::stat("CPU", deg(&cpu_t), cpu_t.as_ref().map(|r| r.label.clone()).unwrap_or_default(), th.temp_color(cpu_t.as_ref().map(|r| r.value as f32).unwrap_or(0.0)), cpu_t.as_ref().map(|r| hv(st, &format!("sensor.{}", r.id))), cx).into_any_element(),
-        kit::stat("GPU", deg(&gpu_t), gpu_t.as_ref().map(|r| r.label.clone()).unwrap_or_default(), th.temp_color(gpu_t.as_ref().map(|r| r.value as f32).unwrap_or(0.0)), gpu_t.as_ref().map(|r| hv(st, &format!("sensor.{}", r.id))), cx).into_any_element(),
+        kit::stat(t!("CPU"), deg(&cpu_t), cpu_t.as_ref().map(|r| r.label.clone()).unwrap_or_default(), th.temp_color(cpu_t.as_ref().map(|r| r.value as f32).unwrap_or(0.0)), cpu_t.as_ref().map(|r| hv(st, &format!("sensor.{}", r.id))), cx).into_any_element(),
+        kit::stat(t!("GPU"), deg(&gpu_t), gpu_t.as_ref().map(|r| r.label.clone()).unwrap_or_default(), th.temp_color(gpu_t.as_ref().map(|r| r.value as f32).unwrap_or(0.0)), gpu_t.as_ref().map(|r| hv(st, &format!("sensor.{}", r.id))), cx).into_any_element(),
         kit::stat(
-            "Más caliente",
-            hottest.map(|h| format!("{:.1}°C", h.1.value)).unwrap_or("N/D".into()),
+            t!("Más caliente"),
+            hottest.map(|h| format!("{:.1}°C", h.1.value)).unwrap_or(t!("N/D").into()),
             hottest.map(|h| format!("{} · {}", h.0.label, h.1.label)).unwrap_or_default(),
             th.temp_color(hottest.map(|h| h.1.value as f32).unwrap_or(0.0)),
             None,
@@ -95,9 +96,9 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
         )
         .into_any_element(),
         kit::stat(
-            "Media",
-            if temps.is_empty() { "N/D".into() } else { format!("{:.1}°C", temps.iter().map(|t| t.1.value).sum::<f64>() / temps.len() as f64) },
-            format!("{all_temps} sensores de temperatura"),
+            t!("Media"),
+            if temps.is_empty() { t!("N/D").into() } else { format!("{:.1}°C", temps.iter().map(|t| t.1.value).sum::<f64>() / temps.len() as f64) },
+            t!("{} sensores de temperatura", all_temps),
             th.teal,
             None,
             cx,
@@ -105,12 +106,12 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
         .into_any_element(),
     ];
     for (c, r) in fans.iter().take(2) {
-        stats.push(kit::stat(format!("Ventilador {}", c.label), format!("{:.0} RPM", r.value), r.max.map(|m| format!("máx. {m:.0} RPM")).unwrap_or(r.label.clone()), th.cyan, Some(hv(st, &format!("sensor.{}", r.id))), cx).into_any_element());
+        stats.push(kit::stat(t!("Ventilador {}", c.label), format!("{:.0} RPM", r.value), r.max.map(|m| t!("máx. {} RPM", format!("{:.0}", m))).unwrap_or(r.label.clone()), th.cyan, Some(hv(st, &format!("sensor.{}", r.id))), cx).into_any_element());
     }
     for (c, r) in power.iter().take(2) {
-        stats.push(kit::stat(format!("Potencia {}", c.label), format!("{:.1} W", r.value), r.label.clone(), th.orange, Some(hv(st, &format!("sensor.{}", r.id))), cx).into_any_element());
+        stats.push(kit::stat(t!("Potencia {}", c.label), format!("{:.1} W", r.value), r.label.clone(), th.orange, Some(hv(st, &format!("sensor.{}", r.id))), cx).into_any_element());
     }
-    stats.push(kit::stat("Chips", chips.len().to_string(), chips.iter().map(|c| c.driver.as_str()).collect::<Vec<_>>().join(", "), th.violet, None, cx).into_any_element());
+    stats.push(kit::stat(t!("Chips"), chips.len().to_string(), chips.iter().map(|c| c.driver.as_str()).collect::<Vec<_>>().join(", "), th.violet, None, cx).into_any_element());
 
     // rótulos cortos en el radar: primera palabra del chip + sensor ("NVMe Composite", "GPU edge")
     let radar: Vec<(String, f32)> = temps
@@ -126,9 +127,9 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
 
     let mut g = kit::grid(cx)
         .child(kit::stats_row(stats, cx))
-        .child(Panel::new("Mapa térmico", th.amber).span(2).extra("% del límite crítico de cada sensor").child(charts::radar(radar, th.amber, 320.)))
-        .child(Panel::new("Temperaturas", th.red).span(2).extra("valor / límite crítico").child(bars))
-        .child(Panel::new("Historial de temperaturas", th.amber).span(4).extra(kit::legend(temp_legend.into_iter().take(6).collect())).child(Plot::new(temp_lines, t.clone()).y_fmt(y_deg).height(240.).into_element()));
+        .child(Panel::new(t!("Mapa térmico"), th.amber).span(2).extra(t!("% del límite crítico de cada sensor")).child(charts::radar(radar, th.amber, 320.)))
+        .child(Panel::new(t!("Temperaturas"), th.red).span(2).extra(t!("valor / límite crítico")).child(bars))
+        .child(Panel::new(t!("Historial de temperaturas"), th.amber).span(4).extra(kit::legend(temp_legend.into_iter().take(6).collect())).child(Plot::new(temp_lines, t.clone()).y_fmt(y_deg).height(240.).into_element()));
 
     for c in chips {
         let accent = cat_color(&c.category);
@@ -141,9 +142,9 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
                 _ => 0.0,
             };
             let lim = match (r.max, r.crit) {
-                (Some(m), Some(c)) => format!("máx {m:.0}{u} · crít {c:.0}{u}", u = unit(&r.kind)),
-                (Some(m), None) => format!("máx {m:.0}{}", unit(&r.kind)),
-                (None, Some(c)) => format!("crít {c:.0}{}", unit(&r.kind)),
+                (Some(m), Some(c)) => { let u = unit(&r.kind); t!("máx {}{} · crít {}{}", format!("{:.0}", m), u, format!("{:.0}", c), u) },
+                (Some(m), None) => t!("máx {}{}", format!("{:.0}", m), unit(&r.kind)),
+                (None, Some(c)) => t!("crít {}{}", format!("{:.0}", c), unit(&r.kind)),
                 _ => String::new(),
             };
             div()
@@ -169,19 +170,19 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
         lines.extend(power.iter().enumerate().map(|(i, (_, r))| Line::new(hv(st, &format!("sensor.{}", r.id)), [th.orange, th.amber][i % 2]).dashed()));
         let mut legend: Vec<(String, Hsla)> = fans.iter().enumerate().map(|(i, (c, r))| (format!("{} {} RPM", c.label, r.label), [th.cyan, th.teal, th.blue][i % 3])).collect();
         legend.extend(power.iter().enumerate().map(|(i, (c, r))| (format!("{} {} W", c.label, r.label), [th.orange, th.amber][i % 2])));
-        g = g.child(Panel::new("Ventiladores y potencia", th.cyan).span(2).extra(kit::legend(legend)).child(Plot::new(lines, t.clone()).height(200.).into_element()));
+        g = g.child(Panel::new(t!("Ventiladores y potencia"), th.cyan).span(2).extra(kit::legend(legend)).child(Plot::new(lines, t.clone()).height(200.).into_element()));
     }
-    for (title, r) in [("Temp. CPU", &cpu_t), ("Temp. GPU", &gpu_t)] {
+    for (title, r) in [(t!("Temp. CPU"), &cpu_t), (t!("Temp. GPU"), &gpu_t)] {
         if let Some(r) = r {
             let c = th.temp_color(r.value as f32);
-            g = g.child(Panel::new(title, c).child(charts::gauge((r.value / limit(r)) as f32, c, format!("{:.1}°", r.value), format!("límite {:.0}°", limit(r)), r.label.clone(), 200.)));
+            g = g.child(Panel::new(title, c).child(charts::gauge((r.value / limit(r)) as f32, c, format!("{:.1}°", r.value), t!("límite {}°", format!("{:.0}", limit(r))), r.label.clone(), 200.)));
         }
     }
     for b in &s.sensors.batteries {
         g = g.child(
-            Panel::new(format!("Batería {}", b.name), th.lime)
+            Panel::new(t!("Batería {}", b.name), th.lime)
                 .span(2)
-                .extra(format!("{}{}", b.status, if s.sensors.ac_online == Some(true) { " · conectado a corriente" } else { "" }))
+                .extra(format!("{}{}", b.status, if s.sensors.ac_online == Some(true) { t!(" · conectado a corriente") } else { "" }))
                 .child(
                     div()
                         .flex()
@@ -191,17 +192,17 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
                             if b.capacity < 20.0 { th.red } else { th.lime },
                             format!("{:.0}%", b.capacity),
                             b.power.map(|p| format!("{p:.1} W")).unwrap_or_default(),
-                            "CARGA".into(),
+                            t!("CARGA").into(),
                             180.,
                         )))
                         .child(div().flex_1().child(kit::kv_grid(
                             vec![
-                                ("Energía".into(), format!("{} / {} Wh", b.energy_now.map(|v| format!("{v:.1}")).unwrap_or("?".into()), b.energy_full.map(|v| format!("{v:.1}")).unwrap_or("?".into()))),
-                                ("Salud".into(), match (b.energy_full, b.energy_design) {
-                                    (Some(f), Some(d)) if d > 0.0 => format!("{:.0}% del diseño", f / d * 100.0),
-                                    _ => "N/D".into(),
+                                (t!("Energía").into(), format!("{} / {} Wh", b.energy_now.map(|v| format!("{v:.1}")).unwrap_or("?".into()), b.energy_full.map(|v| format!("{v:.1}")).unwrap_or("?".into()))),
+                                (t!("Salud").into(), match (b.energy_full, b.energy_design) {
+                                    (Some(f), Some(d)) if d > 0.0 => t!("{}% del diseño", format!("{:.0}", f / d * 100.0)),
+                                    _ => t!("N/D").into(),
                                 }),
-                                ("Ciclos".into(), b.cycles.map(|c| c.to_string()).unwrap_or("N/D".into())),
+                                (t!("Ciclos").into(), b.cycles.map(|c| c.to_string()).unwrap_or(t!("N/D").into())),
                             ],
                             false,
                             cx,
@@ -210,8 +211,8 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
         );
     }
     if !has_board {
-        g = g.child(Panel::new("Sensores de placa base", th.muted).span(4).child(kit::muted(
-            "No se detectan sensores de la placa base (ventiladores de caja, voltajes, temperatura del chipset). Suelen requerir un módulo del kernel según el chip: nct6775 (Nuvoton, la mayoría de placas ASUS/MSI/ASRock), it87 (ITE, Gigabyte) o asus_ec_sensors. Puedes detectarlo con «sudo sensors-detect» (paquete lm_sensors); NeonTop los mostrará automáticamente al cargarse.",
+        g = g.child(Panel::new(t!("Sensores de placa base"), th.muted).span(4).child(kit::muted(
+            t!("No se detectan sensores de la placa base (ventiladores de caja, voltajes, temperatura del chipset). Suelen requerir un módulo del kernel según el chip: nct6775 (Nuvoton, la mayoría de placas ASUS/MSI/ASRock), it87 (ITE, Gigabyte) o asus_ec_sensors. Puedes detectarlo con «sudo sensors-detect» (paquete lm_sensors); NeonTop los mostrará automáticamente al cargarse."),
             cx,
         )));
     }

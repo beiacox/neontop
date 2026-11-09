@@ -28,9 +28,9 @@ const NCORES: usize = 12;
 pub fn info() -> SystemInfo {
     SystemInfo {
         hostname: "demo".into(),
-        os: "NeonTop (modo demo)".into(),
+        os: crate::t!("NeonTop (modo demo)").into(),
         kernel: "6.x-demo".into(),
-        cpu_model: "CPU de demostración · 6 núcleos".into(),
+        cpu_model: crate::t!("CPU de demostración · 6 núcleos").into(),
         logical_cores: NCORES as u32,
         physical_cores: 6,
         freq_min: vec![550.0; NCORES],
@@ -133,9 +133,9 @@ impl Demo {
         let gb = |x: f64| (x * GB) as u64;
 
         let mut sources = vec![
-            EnergySource { in_total: true, limit: Some(88.0), ..self.src("rapl:intel-rapl:0", "CPU (paquete)", "cpu", pkg_w, dt) },
-            EnergySource { parent: Some("rapl:intel-rapl:0".into()), ..self.src("rapl:intel-rapl:0:0", "Núcleos de CPU", "cpu-core", pkg_w * 0.72, dt) },
-            EnergySource { in_total: true, limit: Some(160.0), method: "sensor".into(), ..self.src("gpu:0000:03:00.0", "GPU de demostración", "gpu", gpu_w, dt) },
+            EnergySource { in_total: true, limit: Some(88.0), ..self.src("rapl:intel-rapl:0", crate::t!("CPU (paquete)"), "cpu", pkg_w, dt) },
+            EnergySource { parent: Some("rapl:intel-rapl:0".into()), ..self.src("rapl:intel-rapl:0:0", crate::t!("Núcleos de CPU"), "cpu-core", pkg_w * 0.72, dt) },
+            EnergySource { in_total: true, limit: Some(160.0), method: "sensor".into(), ..self.src("gpu:0000:03:00.0", crate::t!("GPU de demostración"), "gpu", gpu_w, dt) },
         ];
         // SAI simulado: el PC + ~45 W de monitores y resto, en saltos de 9 W (carga en % enteros)
         let ups_load = ((pkg_w + gpu_w + 45.0) / 900.0 * 100.0).round();
@@ -238,7 +238,7 @@ impl Demo {
                 io: Psi { some: (io_wave * 2.0) as f32, full: io_wave as f32 },
             },
             gpus: vec![GpuSnapshot {
-                name: "GPU de demostración".into(),
+                name: crate::t!("GPU de demostración").into(),
                 vendor: "amd".into(),
                 pci_slot: "0000:03:00.0".into(),
                 driver: "amdgpu".into(),
@@ -285,7 +285,7 @@ impl Demo {
                 disks: vec![
                     DiskSnapshot {
                         name: "nvme0n1".into(),
-                        model: "SSD NVMe de demostración".into(),
+                        model: crate::t!("SSD NVMe de demostración").into(),
                         kind: "nvme".into(),
                         size: 1_000_000_000_000,
                         read_rate,
@@ -304,7 +304,7 @@ impl Demo {
                     },
                     DiskSnapshot {
                         name: "sda".into(),
-                        model: "HDD de demostración".into(),
+                        model: crate::t!("HDD de demostración").into(),
                         kind: "hdd".into(),
                         size: 2_000_000_000_000,
                         read_rate: read_rate * 0.1,
@@ -338,7 +338,7 @@ impl Demo {
                             reading("hwmon1:amdgpu/power1_average", "PPT", "power", gpu_w, None, None),
                         ],
                     ),
-                    chip("hwmon2:nvme", "nvme", "NVMe de demostración", "disk", vec![reading("hwmon2:nvme/temp1", "Composite", "temp", 38.0 + load * 12.0, Some(84.85), Some(94.85))]),
+                    chip("hwmon2:nvme", "nvme", crate::t!("NVMe de demostración"), "disk", vec![reading("hwmon2:nvme/temp1", "Composite", "temp", 38.0 + load * 12.0, Some(84.85), Some(94.85))]),
                 ],
                 ..Default::default()
             },
@@ -393,7 +393,7 @@ impl Demo {
         self.game_frames += fts.len() as u64;
         GameSnapshot {
             pid: 4210,
-            title: "Juego de demostración".into(),
+            title: crate::t!("Juego de demostración").into(),
             exe: "Demo.exe".into(),
             api: "vulkan".into(),
             bits: 64,
@@ -448,9 +448,9 @@ pub fn fps_auto() -> crate::launchers::FpsAuto {
     crate::launchers::FpsAuto {
         enabled: true,
         launchers: vec![
-            LauncherStatus { id: "steam", name: "Steam", total: 20, applied: 19, running: true, scope: "opciones de lanzamiento de cada juego" },
-            LauncherStatus { id: "heroic", name: "Heroic", total: 29, applied: 29, running: false, scope: "envoltorio de cada juego y de los juegos nuevos" },
-            LauncherStatus { id: "lutris", name: "Lutris", total: 1, applied: 1, running: false, scope: "prefijo de comando global" },
+            LauncherStatus { id: "steam", name: "Steam", total: 20, applied: 19, running: true, scope: crate::t!("opciones de lanzamiento de cada juego") },
+            LauncherStatus { id: "heroic", name: "Heroic", total: 29, applied: 29, running: false, scope: crate::t!("envoltorio de cada juego y de los juegos nuevos") },
+            LauncherStatus { id: "lutris", name: "Lutris", total: 1, applied: 1, running: false, scope: crate::t!("prefijo de comando global") },
         ],
     }
 }
@@ -480,7 +480,7 @@ pub fn history(now_ms: u64) -> Vec<crate::fps::Benchmark> {
             let a = avg * (0.9 + (i as f32 * 0.07) % 0.2);
             out.push(crate::fps::Benchmark {
                 id: format!("demo{k:04}"),
-                kind: Some(if k % 5 == 0 { "bench".into() } else { "session".into() }),
+                kind: Some(if k.is_multiple_of(5) { "bench".into() } else { "session".into() }),
                 title: title.into(),
                 exe: exe.into(),
                 api: api.into(),

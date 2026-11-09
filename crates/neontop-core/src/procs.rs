@@ -22,25 +22,25 @@ pub struct ProcHistory {
 /// Descripción de los estados de /proc/pid/stat.
 pub fn state(s: &str) -> (&'static str, Slot) {
     match s {
-        "R" => ("Ejecutando", Slot::Lime),
-        "S" => ("Durmiendo", Slot::Cyan),
-        "D" => ("Espera de disco", Slot::Amber),
-        "I" => ("Inactivo (kernel)", Slot::Muted),
-        "Z" => ("Zombi", Slot::Red),
-        "T" | "t" => (if s == "T" { "Detenido" } else { "Trazado" }, Slot::Violet),
-        "X" => ("Muerto", Slot::Red),
-        _ => ("Desconocido", Slot::Muted),
+        "R" => (crate::t!("Ejecutando"), Slot::Lime),
+        "S" => (crate::t!("Durmiendo"), Slot::Cyan),
+        "D" => (crate::t!("Espera de disco"), Slot::Amber),
+        "I" => (crate::t!("Inactivo (kernel)"), Slot::Muted),
+        "Z" => (crate::t!("Zombi"), Slot::Red),
+        "T" | "t" => (if s == "T" { crate::t!("Detenido") } else { crate::t!("Trazado") }, Slot::Violet),
+        "X" => (crate::t!("Muerto"), Slot::Red),
+        _ => (crate::t!("Desconocido"), Slot::Muted),
     }
 }
 
 /// Señales que se pueden enviar desde la interfaz: (nombre, descripción).
 pub const SIGNALS: [(&str, &str); 6] = [
-    ("TERM", "Terminar"),
-    ("KILL", "Matar"),
-    ("INT", "Interrumpir"),
-    ("HUP", "Recargar (HUP)"),
-    ("STOP", "Pausar"),
-    ("CONT", "Reanudar"),
+    ("TERM", crate::n!("Terminar")),
+    ("KILL", crate::n!("Matar")),
+    ("INT", crate::n!("Interrumpir")),
+    ("HUP", crate::n!("Recargar (HUP)")),
+    ("STOP", crate::n!("Pausar")),
+    ("CONT", crate::n!("Reanudar")),
 ];
 
 #[derive(Default)]

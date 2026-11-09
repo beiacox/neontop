@@ -67,24 +67,24 @@ fn rule(id: &str, label: &str, unit: &str, enabled: bool, threshold: f64, sustai
 
 pub fn defaults() -> Vec<Rule> {
     vec![
-        rule("cpuTemp", "Temperatura de CPU", "°C", true, 85.0, 10, 5),
-        rule("gpuTemp", "Temperatura de GPU (unión)", "°C", true, 95.0, 10, 5),
-        rule("cpuUsage", "Uso de CPU", "%", false, 95.0, 60, 15),
-        rule("ram", "Uso de RAM", "%", true, 90.0, 15, 15),
-        rule("swap", "Uso de swap", "%", false, 50.0, 30, 15),
+        rule("cpuTemp", crate::n!("Temperatura de CPU"), "°C", true, 85.0, 10, 5),
+        rule("gpuTemp", crate::n!("Temperatura de GPU (unión)"), "°C", true, 95.0, 10, 5),
+        rule("cpuUsage", crate::n!("Uso de CPU"), "%", false, 95.0, 60, 15),
+        rule("ram", crate::n!("Uso de RAM"), "%", true, 90.0, 15, 15),
+        rule("swap", crate::n!("Uso de swap"), "%", false, 50.0, 30, 15),
         // un disco lleno no se arregla solo en 5 minutos: se avisa una vez
-        rule("diskFull", "Sistema de ficheros lleno", "%", true, 90.0, 0, 0),
-        rule("diskTemp", "Temperatura de disco", "°C", true, 70.0, 30, 15),
-        Rule { flag: true, ..rule("upsOnBatt", "Corte de luz (SAI en batería)", "", true, 1.0, 0, 0) },
-        Rule { below: true, ..rule("upsBattery", "Batería del SAI baja", "%", true, 30.0, 0, 0) },
+        rule("diskFull", crate::n!("Sistema de ficheros lleno"), "%", true, 90.0, 0, 0),
+        rule("diskTemp", crate::n!("Temperatura de disco"), "°C", true, 70.0, 30, 15),
+        Rule { flag: true, ..rule("upsOnBatt", crate::n!("Corte de luz (SAI en batería)"), "", true, 1.0, 0, 0) },
+        Rule { below: true, ..rule("upsBattery", crate::n!("Batería del SAI baja"), "%", true, 30.0, 0, 0) },
     ]
 }
 
 /// Reglas que vigilan varios elementos (se pueden ignorar uno a uno) y cómo se llaman.
 pub fn multi(rule: &str) -> Option<&'static str> {
     match rule {
-        "diskFull" => Some("sistemas de ficheros"),
-        "diskTemp" => Some("discos"),
+        "diskFull" => Some(crate::t!("sistemas de ficheros")),
+        "diskTemp" => Some(crate::t!("discos")),
         _ => None,
     }
 }
@@ -134,7 +134,7 @@ pub fn probe(rule: &str, s: &Snapshot) -> Vec<Item> {
             .ups
             .as_ref()
             .map(|u| {
-                let detail = format!("batería {} % · {} min de autonomía", fmt0(u.battery_pct), fmt0(u.runtime_min));
+                let detail = crate::t!("batería {} % · {} min de autonomía", fmt0(u.battery_pct), fmt0(u.runtime_min));
                 one(if u.on_battery { 1.0 } else { 0.0 }, Some(detail))
             })
             .unwrap_or_default(),
@@ -142,7 +142,7 @@ pub fn probe(rule: &str, s: &Snapshot) -> Vec<Item> {
             .energy
             .ups
             .as_ref()
-            .and_then(|u| u.battery_pct.map(|b| one(b, Some(format!("{} min de autonomía", fmt0(u.runtime_min))))))
+            .and_then(|u| u.battery_pct.map(|b| one(b, Some(crate::t!("{} min de autonomía", fmt0(u.runtime_min))))))
             .unwrap_or_default(),
         _ => Vec::new(),
     }
@@ -329,14 +329,14 @@ impl Alerts {
                     continue;
                 }
                 let (title, body) = if r.flag {
-                    (format!("⚠ {}", r.label), it.detail.clone().unwrap_or_default())
+                    (format!("⚠ {}", crate::i18n::t(&r.label)), it.detail.clone().unwrap_or_default())
                 } else {
                     let digits = if r.unit == "%" { 0 } else { 1 };
                     let value = format!("{:.*}{}", digits, it.value, r.unit);
                     let detail = it.detail.as_ref().map(|d| format!("{d} · ")).unwrap_or_default();
-                    let sustain = if r.sustain > 0 { format!(" durante {} s", r.sustain) } else { String::new() };
+                    let sustain = if r.sustain > 0 { crate::t!(" durante {} s", r.sustain) } else { String::new() };
                     let cmp = if r.below { "<" } else { ">" };
-                    (format!("⚠ {}: {value}", r.label), format!("{detail}umbral {cmp} {}{}{sustain}", r.threshold, r.unit))
+                    (format!("⚠ {}: {value}", crate::i18n::t(&r.label)), crate::t!("{}umbral {} {}{}{}", detail, cmp, r.threshold, r.unit, sustain))
                 };
                 self.seq += 1;
                 fired.push(Fired {
@@ -444,7 +444,7 @@ mod tests {
         assert_eq!(a.rules.iter().find(|r| r.id == "diskFull").unwrap().ignore, vec!["/datos"]);
         a.unignore("diskFull", "/datos");
         assert!(a.rules.iter().find(|r| r.id == "diskFull").unwrap().ignore.is_empty());
-        assert_eq!(multi("diskFull"), Some("sistemas de ficheros"));
+        assert_eq!(multi("diskFull"), Some(crate::t!("sistemas de ficheros")));
     }
 
     #[test]

@@ -1,6 +1,7 @@
 //! Procesos: tabla ordenable (lista o árbol plegable) con búsqueda, detalle del proceso elegido
 //! con señales y prioridad, y gráficas de quién gasta CPU y memoria.
 
+use neontop_core::t;
 use std::collections::{HashMap, HashSet};
 
 use gpui::{div, prelude::*, px, uniform_list, AnyElement, Context, Entity, FontWeight, Hsla, SharedString, Subscription, UniformListScrollHandle, Window};
@@ -33,16 +34,16 @@ pub enum Col {
 }
 
 const COLS: [(Col, &str, f32); 10] = [
-    (Col::Name, "Nombre", 0.0),
+    (Col::Name, neontop_core::n!("Nombre"), 0.0),
     (Col::Pid, "PID", 64.0),
-    (Col::User, "Usuario", 90.0),
-    (Col::State, "Est.", 40.0),
+    (Col::User, neontop_core::n!("Usuario"), 90.0),
+    (Col::State, neontop_core::n!("Est."), 40.0),
     (Col::Cpu, "CPU", 64.0),
-    (Col::Mem, "Memoria", 84.0),
-    (Col::Threads, "Hilos", 52.0),
-    (Col::Read, "Lectura", 84.0),
-    (Col::Write, "Escritura", 84.0),
-    (Col::Time, "T. CPU", 80.0),
+    (Col::Mem, neontop_core::n!("Memoria"), 84.0),
+    (Col::Threads, neontop_core::n!("Hilos"), 52.0),
+    (Col::Read, neontop_core::n!("Lectura"), 84.0),
+    (Col::Write, neontop_core::n!("Escritura"), 84.0),
+    (Col::Time, neontop_core::n!("T. CPU"), 80.0),
 ];
 
 /// Una fila de la tabla (el proceso y su posición en el árbol).
@@ -75,7 +76,7 @@ pub struct ProcsView {
 
 impl ProcsView {
     pub fn new(_window: &mut Window, cx: &mut Context<Root>) -> Self {
-        let search = cx.new(|cx| TextInput::new(cx, "Filtrar por nombre, comando, usuario o PID…"));
+        let search = cx.new(|cx| TextInput::new(cx, t!("Filtrar por nombre, comando, usuario o PID…")));
         let sub = cx.subscribe(&search, |_, _, _: &InputEvent, cx| cx.notify());
         ProcsView {
             search,
@@ -194,7 +195,7 @@ fn send_signal(this: &mut Root, pid: u32, sig: &'static str, cx: &mut Context<Ro
         let s = this.state.read(cx);
         (s.ui.admin_actions, s.demo)
     };
-    let label = SIGNALS.iter().find(|s| s.0 == sig).map(|s| s.1).unwrap_or(sig);
+    let label = SIGNALS.iter().find(|s| s.0 == sig).map(|s| neontop_core::i18n::t(s.1)).unwrap_or(sig);
     let view = cx.entity().downgrade();
     cx.spawn(async move |_, cx| {
         let res = cx
@@ -204,14 +205,14 @@ fn send_signal(this: &mut Root, pid: u32, sig: &'static str, cx: &mut Context<Ro
                     return Ok(());
                 }
                 match neontop_core::collectors::processes::send_signal(pid, sig) {
-                    Err(e) if elevate && (e.contains("no permitida") || e.contains("Permiso denegado")) => neontop_core::helper::elevate(&["signal", &pid.to_string(), sig]),
+                    Err(e) if elevate && (neontop_core::collectors::processes::is_permission_error(&e)) => neontop_core::helper::elevate(&["signal", &pid.to_string(), sig]),
                     other => other,
                 }
             })
             .await;
         let _ = view.update(cx, |this, cx| {
             this.procs.msg = Some(match res {
-                Ok(()) => Notice::Ok(format!("{label}: señal enviada a {pid}")),
+                Ok(()) => Notice::Ok(t!("{}: señal enviada a {}", label, pid)),
                 Err(e) => Notice::Err(e),
             });
             cx.notify();
@@ -235,14 +236,14 @@ fn renice(this: &mut Root, pid: u32, cx: &mut Context<Root>) {
                     return Ok(());
                 }
                 match neontop_core::collectors::processes::renice(pid, nice) {
-                    Err(e) if elevate && (e.contains("no permitida") || e.contains("Permiso denegado")) => neontop_core::helper::elevate(&["renice", &pid.to_string(), &nice.to_string()]),
+                    Err(e) if elevate && (neontop_core::collectors::processes::is_permission_error(&e)) => neontop_core::helper::elevate(&["renice", &pid.to_string(), &nice.to_string()]),
                     other => other,
                 }
             })
             .await;
         let _ = view.update(cx, |this, cx| {
             this.procs.msg = Some(match res {
-                Ok(()) => Notice::Ok(format!("Prioridad de {pid}: nice {nice}")),
+                Ok(()) => Notice::Ok(t!("Prioridad de {}: nice {}", pid, nice)),
                 Err(e) => Notice::Err(e),
             });
             cx.notify();
@@ -294,7 +295,7 @@ fn table(root: &mut Root, cpu_div: f32, cx: &mut Context<Root>) -> impl IntoElem
                     }
                     cx.notify();
                 }))
-                .child(format!("{}{arrow}", th.title(label)))
+                .child(format!("{}{arrow}", th.title(neontop_core::i18n::t(label))))
         }));
     let n = v.rows.len();
     let list = uniform_list(
@@ -406,34 +407,34 @@ fn detail(root: &Root, p: &ProcInfo, alive: bool, cpu_div: f32, all: &[ProcInfo]
                 .gap(px(10.))
                 .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(th.dsize(17.))).text_color(th.load_color(cpu)).truncate().child(p.name.clone()))
                 .child(kit::muted(format!("PID {pid}"), cx))
-                .when(!alive, |d| d.child(kit::badge("TERMINADO", th.red))),
+                .when(!alive, |d| d.child(kit::badge(t!("TERMINADO"), th.red))),
         )
         .child(div().p(px(6.)).bg(fade(th.bg, 0.6)).rounded(px(4.)).text_size(px(10.5)).font_family(th.mono.clone()).text_color(th.muted).child(p.cmd.clone()))
-        .child(spark("CPU", format!("{cpu:.1}%"), th.load_color(cpu), h.as_ref().map(|h| h.cpu.iter().map(|v| v / cpu_div).collect()), Some(10f32.max(h.as_ref().map(|h| h.cpu.iter().copied().fold(0.0, f32::max) / cpu_div).unwrap_or(0.0)))))
-        .child(spark("Memoria", fmt::bytes(p.mem as f64), th.magenta, h.as_ref().map(|h| h.mem.iter().copied().collect()), None))
+        .child(spark(t!("CPU"), format!("{cpu:.1}%"), th.load_color(cpu), h.as_ref().map(|h| h.cpu.iter().map(|v| v / cpu_div).collect()), Some(10f32.max(h.as_ref().map(|h| h.cpu.iter().copied().fold(0.0, f32::max) / cpu_div).unwrap_or(0.0)))))
+        .child(spark(t!("Memoria"), fmt::bytes(p.mem as f64), th.magenta, h.as_ref().map(|h| h.mem.iter().copied().collect()), None))
         .child(spark(
-            "E/S disco",
-            if p.read_rate.is_none() { "sin permiso".into() } else { fmt::rate(p.read_rate.unwrap_or(0.0) + p.write_rate.unwrap_or(0.0)) },
+            t!("E/S disco"),
+            if p.read_rate.is_none() { t!("sin permiso").into() } else { fmt::rate(p.read_rate.unwrap_or(0.0) + p.write_rate.unwrap_or(0.0)) },
             th.amber,
             h.as_ref().filter(|_| p.read_rate.is_some()).map(|h| h.io.iter().copied().collect()),
             None,
         ))
         .child(kit::kv_grid(
             vec![
-                ("Estado".into(), format!("{} · {state_label}", p.state)),
-                ("Usuario".into(), format!("{} (uid {})", p.user, p.uid)),
-                ("Padre".into(), parent.as_ref().map(|(pp, n)| format!("{n} ({pp})")).unwrap_or(p.ppid.to_string()) + &if children > 0 { format!(" · {children} hijos") } else { String::new() }),
-                ("Hilos".into(), p.threads.to_string()),
-                ("Prioridad".into(), format!("{} · nice {}", p.priority, p.nice)),
-                ("Virtual".into(), fmt::bytes(p.virt as f64)),
-                ("T. CPU".into(), fmt::duration(p.cpu_time)),
-                ("Iniciado".into(), format!("hace {}", fmt::duration((uptime - p.start).max(0.0)))),
+                (t!("Estado").into(), format!("{} · {state_label}", p.state)),
+                (t!("Usuario").into(), t!("{} (uid {})", p.user, p.uid)),
+                (t!("Padre").into(), parent.as_ref().map(|(pp, n)| format!("{n} ({pp})")).unwrap_or(p.ppid.to_string()) + &if children > 0 { t!(" · {} hijos", children) } else { String::new() }),
+                (t!("Hilos").into(), p.threads.to_string()),
+                (t!("Prioridad").into(), t!("{} · nice {}", p.priority, p.nice)),
+                (t!("Virtual").into(), fmt::bytes(p.virt as f64)),
+                (t!("T. CPU").into(), fmt::duration(p.cpu_time)),
+                (t!("Iniciado").into(), t!("hace {}", fmt::duration((uptime - p.start).max(0.0)))),
             ],
             false,
             cx,
         ));
     if let Some((ppid, pname)) = parent {
-        col = col.child(kit::button("go-parent", format!("Ir al padre: {pname}"), th.cyan, cx).on_click(cx.listener(move |this, _, _, cx| {
+        col = col.child(kit::button("go-parent", t!("Ir al padre: {}", pname), th.cyan, cx).on_click(cx.listener(move |this, _, _, cx| {
             this.procs.selected = Some(ppid);
             cx.notify();
         })));
@@ -441,15 +442,16 @@ fn detail(root: &Root, p: &ProcInfo, alive: bool, cpu_div: f32, all: &[ProcInfo]
     if alive {
         let confirming = root.procs.confirming;
         col = col
-            .child(kit::muted("SEÑALES", cx).text_size(px(9.5)))
+            .child(kit::muted(t!("SEÑALES"), cx).text_size(px(9.5)))
             .child(div().flex().flex_wrap().gap(px(6.)).children(SIGNALS.iter().map(|&(sig, label)| {
                 let danger = sig == "KILL" || sig == "TERM";
-                let text = if confirming == Some(sig) { format!("¿{label}? Confirmar") } else { label.to_string() };
+                let label = neontop_core::i18n::t(label);
+                let text = if confirming == Some(sig) { t!("¿{}? Confirmar", label) } else { label.to_string() };
                 kit::button(SharedString::from(format!("sig-{sig}")), text, if danger { th.red } else { th.cyan }, cx)
                     .when(confirming == Some(sig), |d| d.bg(fade(th.red, 0.25)))
                     .on_click(cx.listener(move |this, _, _, cx| send_signal(this, pid, sig, cx)))
             })))
-            .child(kit::muted("PRIORIDAD (NICE)", cx).text_size(px(9.5)))
+            .child(kit::muted(t!("PRIORIDAD (NICE)"), cx).text_size(px(9.5)))
             .child(
                 div()
                     .flex()
@@ -468,9 +470,9 @@ fn detail(root: &Root, p: &ProcInfo, alive: bool, cpu_div: f32, all: &[ProcInfo]
                             cx.notify();
                         }),
                     ))
-                    .child(kit::button("nice-apply", "Aplicar", th.lime, cx).when(root.procs.nice == p.nice, |d| d.opacity(0.4)).on_click(cx.listener(move |this, _, _, cx| renice(this, pid, cx)))),
+                    .child(kit::button("nice-apply", t!("Aplicar"), th.lime, cx).when(root.procs.nice == p.nice, |d| d.opacity(0.4)).on_click(cx.listener(move |this, _, _, cx| renice(this, pid, cx)))),
             )
-            .child(kit::muted("Valores más bajos = más prioridad. Bajar el nice requiere privilegios de root.", cx));
+            .child(kit::muted(t!("Valores más bajos = más prioridad. Bajar el nice requiere privilegios de root."), cx));
     }
     col.children(root.procs.msg.clone().map(|m| match m {
         Notice::Ok(s) => div().text_color(th.lime).child(s),
@@ -509,14 +511,14 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
     let cpu_sum = all.iter().map(|p| p.cpu).sum::<f32>() / ncores;
     let get = |k: &str| *by_state.get(k).unwrap_or(&0);
     let stats = vec![
-        kit::stat("Procesos", all.len().to_string(), format!("{kernel} del kernel"), th.cyan, None, cx).into_any_element(),
-        kit::stat("Hilos", threads.to_string(), "", th.violet, None, cx).into_any_element(),
-        kit::stat("Ejecutando", get("R").to_string(), "", th.lime, Some(running_hist), cx).into_any_element(),
-        kit::stat("Durmiendo", (get("S") + get("I")).to_string(), "", th.blue, None, cx).into_any_element(),
-        kit::stat("Espera disco", get("D").to_string(), "", th.amber, None, cx).into_any_element(),
-        kit::stat("Zombis", get("Z").to_string(), "", if get("Z") > 0 { th.red } else { th.muted }, None, cx).into_any_element(),
-        kit::stat("Usuarios", users.len().to_string(), "", th.teal, None, cx).into_any_element(),
-        kit::stat("CPU procesos", fmt::pct(cpu_sum as f64, 1), "suma / núcleos", th.load_color(cpu_sum), None, cx).into_any_element(),
+        kit::stat(t!("Procesos"), all.len().to_string(), t!("{} del kernel", kernel), th.cyan, None, cx).into_any_element(),
+        kit::stat(t!("Hilos"), threads.to_string(), "", th.violet, None, cx).into_any_element(),
+        kit::stat(t!("Ejecutando"), get("R").to_string(), "", th.lime, Some(running_hist), cx).into_any_element(),
+        kit::stat(t!("Durmiendo"), (get("S") + get("I")).to_string(), "", th.blue, None, cx).into_any_element(),
+        kit::stat(t!("Espera disco"), get("D").to_string(), "", th.amber, None, cx).into_any_element(),
+        kit::stat(t!("Zombis"), get("Z").to_string(), "", if get("Z") > 0 { th.red } else { th.muted }, None, cx).into_any_element(),
+        kit::stat(t!("Usuarios"), users.len().to_string(), "", th.teal, None, cx).into_any_element(),
+        kit::stat(t!("CPU procesos"), fmt::pct(cpu_sum as f64, 1), t!("suma / núcleos"), th.load_color(cpu_sum), None, cx).into_any_element(),
     ];
 
     let pv = &root.procs;
@@ -526,34 +528,34 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
         .items_center()
         .gap(px(14.))
         .child(div().flex_1().min_w(px(220.)).child(pv.search.clone()))
-        .child(kit::toggle("p-tree", pv.tree, "Árbol", cx, cx.listener(|this, _, _, cx| {
+        .child(kit::toggle("p-tree", pv.tree, t!("Árbol"), cx, cx.listener(|this, _, _, cx| {
             this.procs.tree = !this.procs.tree;
             cx.notify();
         })))
-        .child(kit::toggle("p-kernel", pv.show_kernel, "Hilos del kernel", cx, cx.listener(|this, _, _, cx| {
+        .child(kit::toggle("p-kernel", pv.show_kernel, t!("Hilos del kernel"), cx, cx.listener(|this, _, _, cx| {
             this.procs.show_kernel = !this.procs.show_kernel;
             cx.notify();
         })))
-        .child(kit::toggle("p-core", pv.per_core, "% por núcleo", cx, cx.listener(|this, _, _, cx| {
+        .child(kit::toggle("p-core", pv.per_core, t!("% por núcleo"), cx, cx.listener(|this, _, _, cx| {
             this.procs.per_core = !this.procs.per_core;
             cx.notify();
         })))
         .when(pv.tree && !pv.collapsed.is_empty(), |d| {
-            d.child(kit::button("p-expand", "Desplegar todo", th.cyan, cx).on_click(cx.listener(|this, _, _, cx| {
+            d.child(kit::button("p-expand", t!("Desplegar todo"), th.cyan, cx).on_click(cx.listener(|this, _, _, cx| {
                 this.procs.collapsed.clear();
                 cx.notify();
             })))
         });
-    let table_panel = Panel::new("Procesos", th.cyan)
+    let table_panel = Panel::new(t!("Procesos"), th.cyan)
         .span(if shown.is_some() { 3 } else { 4 })
-        .extra(format!("{} filas", root.procs.rows.len()))
+        .extra(t!("{} filas", root.procs.rows.len()))
         .child(toolbar)
-        .child(if all.is_empty() { kit::empty("LEYENDO /proc…", cx).into_any_element() } else { table(root, cpu_div, cx).into_any_element() });
+        .child(if all.is_empty() { kit::empty(t!("LEYENDO /proc…"), cx).into_any_element() } else { table(root, cpu_div, cx).into_any_element() });
 
     let mut g = kit::grid(cx).child(kit::stats_row(stats, cx)).child(table_panel);
     if let Some(p) = shown.clone() {
         g = g.child(
-            Panel::new("Detalle", th.magenta)
+            Panel::new(t!("Detalle"), th.magenta)
                 .extra(div().id("close-detail").cursor_pointer().child("✕").on_click(cx.listener(|this, _, _, cx| {
                     this.procs.selected = None;
                     cx.notify();
@@ -603,15 +605,15 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
         let (label, c) = proc_state(s);
         kit::meter_row(format!("{s} · {label}"), *n as f32 / smax, n.to_string(), th.slot(c), cx)
     }));
-    g.child(Panel::new("Top CPU", th.lime).span(2).extra("clic para seleccionar").child(top_rows))
-        .child(Panel::new("CPU × memoria", th.violet).span(2).extra(kit::legend(vec![("usuario".into(), th.cyan), ("root".into(), th.amber)])).child(scatter.into_element()))
-        .child(Panel::new("Memoria por aplicación", th.magenta).span(2).extra("suma de sus procesos").child(app_rows))
+    g.child(Panel::new(t!("Top CPU"), th.lime).span(2).extra(t!("clic para seleccionar")).child(top_rows))
+        .child(Panel::new(t!("CPU × memoria"), th.violet).span(2).extra(kit::legend(vec![("usuario".into(), th.cyan), ("root".into(), th.amber)])).child(scatter.into_element()))
+        .child(Panel::new(t!("Memoria por aplicación"), th.magenta).span(2).extra(t!("suma de sus procesos")).child(app_rows))
         .child(
-            Panel::new("CPU por usuario", th.cyan)
-                .child(charts::ring(ulist.iter().enumerate().map(|(i, u)| (u.1 / utot, th.series(i))).collect(), fmt::pct((cpu_sum) as f64, 0), "CPU total".into(), 200.))
+            Panel::new(t!("CPU por usuario"), th.cyan)
+                .child(charts::ring(ulist.iter().enumerate().map(|(i, u)| (u.1 / utot, th.series(i))).collect(), fmt::pct((cpu_sum) as f64, 0), t!("CPU total").into(), 200.))
                 .child(kit::legend(ulist.iter().enumerate().take(5).map(|(i, u)| (format!("{} {:.0}%", u.0, u.1 / cpu_div), th.series(i))).collect())),
         )
-        .child(Panel::new("Estados", th.amber).child(state_rows))
+        .child(Panel::new(t!("Estados"), th.amber).child(state_rows))
         .into_any_element()
 }
 

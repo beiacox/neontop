@@ -8,6 +8,7 @@
 //!
 //! Es HTTP sin cifrar, pensado para la red de casa; todo exige la clave de acceso.
 
+use neontop_core::t;
 use std::collections::HashMap;
 use std::fmt::Write as _;
 use std::io::Read;
@@ -147,7 +148,7 @@ impl Web {
                     .ok();
             }
             Err(e) => {
-                *self.0.status.lock().unwrap() = WebStatus { running: false, error: Some(format!("No se pudo abrir el puerto {}: {e}", cfg.web_port)), urls: vec![], clients: 0 };
+                *self.0.status.lock().unwrap() = WebStatus { running: false, error: Some(t!("No se pudo abrir el puerto {}: {}", cfg.web_port, e)), urls: vec![], clients: 0 };
             }
         }
     }
@@ -286,11 +287,15 @@ fn action(inner: &Inner, f: &HashMap<String, String>) {
 }
 
 fn login_page() -> String {
-    "<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width'><title>NeonTop</title>\
+    format!(
+        "<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width'><title>NeonTop</title>\
      <body style='background:#07060d;color:#d8e1ff;font-family:monospace;padding:2em'><h2 style='color:#00f0ff'>NeonTop</h2>\
-     <p>Abre el enlace (o escanea el código QR) que aparece en Ajustes → Acceso web del equipo.</p>\
-     <form><input name=t placeholder='clave de acceso' style='padding:.5em;width:16em'> <button>Entrar</button></form>"
-        .into()
+     <p>{}</p>\
+     <form><input name=t placeholder='{}' style='padding:.5em;width:16em'> <button>{}</button></form>",
+        t!("Abre el enlace (o escanea el código QR) que aparece en Ajustes → Acceso web del equipo."),
+        t!("clave de acceso"),
+        t!("Entrar")
+    )
 }
 
 fn css(t: &theme::Theme) -> String {
@@ -352,11 +357,12 @@ fn page(inner: &Inner, tab: &str, theme_id: &str, actions: bool) -> String {
     let refresh = (interval / 1000).clamp(2, 10);
     let _ = write!(
         o,
-        "<!doctype html><html lang=es><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'>\
+        "<!doctype html><html lang={}><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'>\
          <meta http-equiv=refresh content={refresh}><title>NeonTop</title><style>{}</style><header><h1>NEONTOP</h1><nav>",
+        neontop_core::i18n::current().code(),
         css(t)
     );
-    for (id, label) in [("resumen", "Resumen"), ("procesos", "Procesos"), ("juegos", "Juegos"), ("energia", "Energía")] {
+    for (id, label) in [("resumen", t!("Resumen")), ("procesos", t!("Procesos")), ("juegos", t!("Juegos")), ("energia", t!("Energía"))] {
         let _ = write!(o, "<a href='/?tab={id}' class='{}'>{label}</a>", if id == tab { "on" } else { "" });
     }
     o.push_str("</nav>");
@@ -365,7 +371,7 @@ fn page(inner: &Inner, tab: &str, theme_id: &str, actions: bool) -> String {
             o,
             "<form method=post action=/accion><input type=hidden name=a value=pausa><input type=hidden name=tab value='{tab}'><button>{}</button></form>\
              <form method=post action=/accion><input type=hidden name=a value=muestreo><input type=hidden name=tab value='{tab}'><select name=ms>",
-            if paused { "▶ Reanudar" } else { "⏸ Pausar" }
+            if paused { t!("▶ Reanudar") } else { t!("⏸ Pausar") }
         );
         for ms in neontop_core::config::INTERVALS {
             let _ = write!(o, "<option value={ms} {}>{}</option>", if ms == interval { "selected" } else { "" }, fmt::interval(ms));
@@ -374,7 +380,7 @@ fn page(inner: &Inner, tab: &str, theme_id: &str, actions: bool) -> String {
     }
     o.push_str("</header><main>");
     let Some(s) = d.snap.clone() else {
-        o.push_str("<div class=p>Esperando la primera muestra…</div></main>");
+        let _ = write!(o, "<div class=p>{}</div></main>", t!("Esperando la primera muestra…"));
         return o;
     };
     let h = &d.history;
@@ -383,7 +389,7 @@ fn page(inner: &Inner, tab: &str, theme_id: &str, actions: bool) -> String {
     let c = &t.colors;
     match tab {
         "procesos" => {
-            o.push_str("<div class=p style='grid-column:1/-1'><h2>Procesos</h2><table><tr><th>Nombre</th><th>PID</th><th>CPU</th><th>RAM</th>");
+            let _ = write!(o, "<div class=p style='grid-column:1/-1'><h2>{}</h2><table><tr><th>{}</th><th>PID</th><th>CPU</th><th>RAM</th>", t!("Procesos"), t!("Nombre"));
             if actions && !inner.demo {
                 o.push_str("<th></th>");
             }
@@ -395,20 +401,21 @@ fn page(inner: &Inner, tab: &str, theme_id: &str, actions: bool) -> String {
                     if actions && !inner.demo {
                         let _ = write!(
                             o,
-                            "<td><form method=post action=/accion><input type=hidden name=a value=senal><input type=hidden name=tab value=procesos><input type=hidden name=pid value={}><input type=hidden name=sig value=TERM><button title='Terminar'>✕</button></form></td>",
-                            p.pid
+                            "<td><form method=post action=/accion><input type=hidden name=a value=senal><input type=hidden name=tab value=procesos><input type=hidden name=pid value={}><input type=hidden name=sig value=TERM><button title='{}'>✕</button></form></td>",
+                            p.pid,
+                            t!("Terminar")
                         );
                     }
                     o.push_str("</tr>");
                 }
             } else {
-                o.push_str("<tr><td colspan=4 class=m>Cargando la lista de procesos…</td></tr>");
+                let _ = write!(o, "<tr><td colspan=4 class=m>{}</td></tr>", t!("Cargando la lista de procesos…"));
             }
             o.push_str("</table></div>");
         }
         "juegos" => {
             if s.games.games.is_empty() {
-                o.push_str("<div class=p><h2>Juegos</h2><p class=m>Ningún juego medido ahora mismo.</p></div>");
+                let _ = write!(o, "<div class=p><h2>{}</h2><p class=m>{}</p></div>", t!("Juegos"), t!("Ningún juego medido ahora mismo."));
             }
             for g in &s.games.games {
                 let fps = h.view(&format!("game.{}.fps", g.pid), w);
@@ -429,12 +436,13 @@ fn page(inner: &Inner, tab: &str, theme_id: &str, actions: bool) -> String {
             let e = &s.energy;
             let _ = write!(
                 o,
-                "<div class=p><h2>Consumo</h2><div class=big style='color:{}'>{}</div>{}</div>",
+                "<div class=p><h2>{}</h2><div class=big style='color:{}'>{}</div>{}</div>",
+                t!("Consumo"),
                 hx(c.amber),
                 fmt::watts(Some(e.total_w)),
                 svg_spark(&h.view("energy.total", w), &hx(c.amber), None)
             );
-            o.push_str("<div class=p><h2>Fuentes</h2><table>");
+            let _ = write!(o, "<div class=p><h2>{}</h2><table>", t!("Fuentes"));
             for src in neontop_core::energy_log::top_sources(&e.sources) {
                 let _ = write!(o, "<tr><td>{}</td><td>{}</td></tr>", esc(&src.label), fmt::watts(src.watts));
             }
@@ -442,12 +450,11 @@ fn page(inner: &Inner, tab: &str, theme_id: &str, actions: bool) -> String {
             if let Some(u) = &e.ups {
                 let _ = write!(
                     o,
-                    "<div class=p><h2>SAI</h2><div>{} · {}</div><div class=m>batería {:.0} % · {} min · red {:.0} V</div></div>",
+                    "<div class=p><h2>{}</h2><div>{} · {}</div><div class=m>{}</div></div>",
+                    t!("SAI"),
                     esc(&u.model),
-                    if u.on_battery { "EN BATERÍA" } else { "con red" },
-                    u.battery_pct.unwrap_or(0.0),
-                    u.runtime_min.map(|m| format!("{m:.0}")).unwrap_or("?".into()),
-                    u.line_v.unwrap_or(0.0)
+                    if u.on_battery { t!("EN BATERÍA") } else { t!("con red") },
+                    t!("batería {} % · {} min · red {} V", format!("{:.0}", u.battery_pct.unwrap_or(0.0)), u.runtime_min.map(|m| format!("{m:.0}")).unwrap_or("?".into()), format!("{:.0}", u.line_v.unwrap_or(0.0)))
                 );
             }
         }
@@ -466,7 +473,8 @@ fn page(inner: &Inner, tab: &str, theme_id: &str, actions: bool) -> String {
             let used: Vec<f32> = h.view("mem.free", w).iter().map(|f| s.mem.total as f32 - f).collect();
             let _ = write!(
                 o,
-                "<div class=p><h2>Memoria</h2><div class=big style='color:{}'>{}</div><div class=m>swap {}</div>{}</div>",
+                "<div class=p><h2>{}</h2><div class=big style='color:{}'>{}</div><div class=m>swap {}</div>{}</div>",
+                t!("Memoria"),
                 hx(c.magenta),
                 fmt::bytes_of(seg.used as f64, s.mem.total as f64),
                 fmt::bytes(s.mem.swap_total.saturating_sub(s.mem.swap_free) as f64),
@@ -497,13 +505,14 @@ fn page(inner: &Inner, tab: &str, theme_id: &str, actions: bool) -> String {
             }
             let _ = write!(
                 o,
-                "<div class=p><h2>Red</h2><div class=big style='color:{}'>↓ {}</div><div class=m>↑ {}</div>{}</div>",
+                "<div class=p><h2>{}</h2><div class=big style='color:{}'>↓ {}</div><div class=m>↑ {}</div>{}</div>",
+                t!("Red"),
                 hx(c.lime),
                 fmt::rate(rx),
                 fmt::rate(tx),
                 svg_spark(&rxs, &hx(c.lime), None)
             );
-            o.push_str("<div class=p><h2>Discos</h2><table>");
+            let _ = write!(o, "<div class=p><h2>{}</h2><table>", t!("Discos"));
             for f in &s.disks.filesystems {
                 let frac = f.used as f64 / f.total.max(1) as f64;
                 let color = if frac > 0.9 { hx(c.red) } else { hx(c.cyan) };
@@ -512,12 +521,11 @@ fn page(inner: &Inner, tab: &str, theme_id: &str, actions: bool) -> String {
             o.push_str("</table></div>");
             let _ = write!(
                 o,
-                "<div class=p><h2>Sistema</h2><div>{}</div><div class=m>{} · activo {} · muestreo {}{}</div></div>",
+                "<div class=p><h2>{}</h2><div>{}</div><div class=m>{}{}</div></div>",
+                t!("Sistema"),
                 esc(&neontop_core::collectors::system::info().hostname),
-                fmt::watts(Some(s.energy.total_w)),
-                fmt::duration(s.uptime),
-                fmt::interval(interval),
-                if paused { " · EN PAUSA" } else { "" }
+                t!("{} · activo {} · muestreo {}", fmt::watts(Some(s.energy.total_w)), fmt::duration(s.uptime), fmt::interval(interval)),
+                if paused { t!(" · EN PAUSA") } else { "" }
             );
         }
     }

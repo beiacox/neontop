@@ -2,6 +2,7 @@
 //! las métricas principales, mostrar la ventana, pausar el muestreo y salir. Un clic en el icono
 //! abre la ventana.
 
+use neontop_core::t;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, Instant};
@@ -47,7 +48,7 @@ impl ksni::Tray for NeonTray {
             StandardItem { label: self.status.clone(), enabled: false, ..Default::default() }.into(),
             MenuItem::Separator,
             StandardItem {
-                label: "Mostrar NeonTop".into(),
+                label: t!("Mostrar NeonTop").into(),
                 activate: Box::new(|t: &mut Self| {
                     let _ = t.tx.unbounded_send(Msg::Show);
                 }),
@@ -55,7 +56,7 @@ impl ksni::Tray for NeonTray {
             }
             .into(),
             StandardItem {
-                label: if self.paused { "▶ Reanudar muestreo".into() } else { "⏸ Pausar muestreo".into() },
+                label: if self.paused { t!("▶ Reanudar muestreo").into() } else { t!("⏸ Pausar muestreo").into() },
                 activate: Box::new(|t: &mut Self| {
                     let _ = t.tx.unbounded_send(Msg::TogglePause);
                 }),
@@ -64,7 +65,7 @@ impl ksni::Tray for NeonTray {
             .into(),
             MenuItem::Separator,
             StandardItem {
-                label: "Salir de NeonTop".into(),
+                label: t!("Salir de NeonTop").into(),
                 activate: Box::new(|t: &mut Self| {
                     let _ = t.tx.unbounded_send(Msg::Quit);
                 }),
@@ -81,7 +82,7 @@ static LAST: Mutex<Option<Instant>> = Mutex::new(None);
 
 /// Crea el icono. Devuelve `false` si el escritorio no tiene bandeja (StatusNotifierWatcher).
 pub fn create(tx: UnboundedSender<Msg>) -> bool {
-    let tray = NeonTray { status: "NeonTop · iniciando…".into(), paused: false, tx };
+    let tray = NeonTray { status: t!("NeonTop · iniciando…").into(), paused: false, tx };
     match tray.spawn() {
         Ok(h) => {
             let _ = HANDLE.set(h);
@@ -98,6 +99,14 @@ pub fn create(tx: UnboundedSender<Msg>) -> bool {
 /// Hay icono en la bandeja (cerrar la ventana puede dejar NeonTop ahí).
 pub fn available() -> bool {
     AVAILABLE.load(Ordering::Relaxed)
+}
+
+/// Vuelve a construir el menú (tras cambiar de idioma).
+pub fn refresh() {
+    if let Some(h) = HANDLE.get() {
+        h.update(|t| t.status = t!("NeonTop · iniciando…").into());
+    }
+    *LAST.lock().unwrap() = None;
 }
 
 pub fn set_paused(p: bool) {

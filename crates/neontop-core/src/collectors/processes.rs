@@ -189,12 +189,25 @@ impl ProcCollector {
     }
 }
 
+/// Errores de permiso (la interfaz ofrece repetir la acción como administrador).
+fn denied_eperm() -> &'static str {
+    crate::t!("Operación no permitida (el proceso es de otro usuario o requiere root)")
+}
+fn denied_eacces() -> &'static str {
+    crate::t!("Permiso denegado (bajar el nice requiere privilegios)")
+}
+
+/// ¿El error es por falta de permisos?
+pub fn is_permission_error(e: &str) -> bool {
+    e == denied_eperm() || e == denied_eacces()
+}
+
 fn errno_msg() -> String {
     let e = std::io::Error::last_os_error();
     match e.raw_os_error() {
-        Some(libc::EPERM) => "Operación no permitida (el proceso es de otro usuario o requiere root)".into(),
-        Some(libc::EACCES) => "Permiso denegado (bajar el nice requiere privilegios)".into(),
-        Some(libc::ESRCH) => "El proceso ya no existe".into(),
+        Some(libc::EPERM) => denied_eperm().into(),
+        Some(libc::EACCES) => denied_eacces().into(),
+        Some(libc::ESRCH) => crate::t!("El proceso ya no existe").into(),
         _ => e.to_string(),
     }
 }
@@ -207,10 +220,10 @@ pub fn send_signal(pid: u32, signal: &str) -> Result<(), String> {
         "HUP" => libc::SIGHUP,
         "STOP" => libc::SIGSTOP,
         "CONT" => libc::SIGCONT,
-        other => return Err(format!("Señal desconocida: {other}")),
+        other => return Err(crate::t!("Señal desconocida: {}", other)),
     };
     if pid <= 1 {
-        return Err("No se permite enviar señales a init".into());
+        return Err(crate::t!("No se permite enviar señales a init").into());
     }
     // SAFETY: kill() no toca memoria; el pid se ha validado arriba.
     if unsafe { libc::kill(pid as libc::pid_t, sig) } == 0 {

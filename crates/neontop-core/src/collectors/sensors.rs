@@ -83,9 +83,9 @@ fn classify(driver: &str, dev: &Path) -> (&'static str, String) {
         "k10temp" | "zenpower" | "coretemp" | "cpu_thermal" => ("cpu", "CPU".into()),
         "amdgpu" | "radeon" | "nouveau" | "i915" | "xe" => ("gpu", "GPU".into()),
         "nvme" => ("disk", model(dev).map(|m| format!("NVMe {m}")).unwrap_or_else(|| "NVMe".into())),
-        "drivetemp" => ("disk", model(dev).map(|m| format!("Disco {m}")).unwrap_or_else(|| "Disco".into())),
+        "drivetemp" => ("disk", model(dev).map(|m| crate::t!("Disco {}", m)).unwrap_or_else(|| crate::t!("Disco").into())),
         d if d.starts_with("mt79") || d.starts_with("iwlwifi") || d.contains("phy") => ("network", "Wi-Fi".into()),
-        d if d.starts_with("nct") || d.starts_with("it8") || d.starts_with("asus") || d.contains("ec") => ("board", "Placa base".into()),
+        d if d.starts_with("nct") || d.starts_with("it8") || d.starts_with("asus") || d.contains("ec") => ("board", crate::t!("Placa base").into()),
         "acpitz" => ("board", "ACPI".into()),
         _ => ("other", driver.into()),
     }

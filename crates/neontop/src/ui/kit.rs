@@ -296,9 +296,9 @@ pub fn stepper(
         .border_1()
         .border_color(th.border(th.cyan))
         .rounded(px(4.))
-        .child(b(format!("{id}-dec"), "−").on_click(on_dec))
+        .child(b(format!("{}-dec", id), "−").on_click(on_dec))
         .child(div().min_w(px(52.)).px(px(4.)).text_size(px(11.5)).font_family(th.mono.clone()).flex().justify_center().child(value))
-        .child(b(format!("{id}-inc"), "+").on_click(on_inc))
+        .child(b(format!("{}-inc", id), "+").on_click(on_inc))
 }
 
 /// Fila "etiqueta … valor" de las listas de detalles.

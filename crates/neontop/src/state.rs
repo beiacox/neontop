@@ -154,6 +154,18 @@ impl AppState {
         cx.notify();
     }
 
+    /// Cambia el idioma (`None` = el del sistema), lo guarda y redibuja todo.
+    pub fn set_lang(&mut self, lang: Option<String>, cx: &mut Context<Self>) {
+        neontop_core::i18n::init(lang.as_deref());
+        self.ui.lang = lang;
+        if !self.demo {
+            self.save_ui();
+        }
+        crate::tray::refresh();
+        cx.refresh_windows();
+        cx.notify();
+    }
+
     pub fn update_ui(&mut self, f: impl FnOnce(&mut UiSettings), cx: &mut Context<Self>) {
         f(&mut self.ui);
         self.save_ui();

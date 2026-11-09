@@ -140,15 +140,15 @@ impl FrameStats {
 /// Calificación de una puntuación de estabilidad (texto y color).
 pub fn stability_label(score: f32, frames: u64) -> (&'static str, Slot) {
     if frames < 30 {
-        ("sin datos", Slot::Muted)
+        (crate::t!("sin datos"), Slot::Muted)
     } else if score >= 90.0 {
-        ("Excelente", Slot::Lime)
+        (crate::t!("Excelente"), Slot::Lime)
     } else if score >= 75.0 {
-        ("Buena", Slot::Cyan)
+        (crate::t!("Buena"), Slot::Cyan)
     } else if score >= 55.0 {
-        ("Irregular", Slot::Amber)
+        (crate::t!("Irregular"), Slot::Amber)
     } else {
-        ("Mala", Slot::Red)
+        (crate::t!("Mala"), Slot::Red)
     }
 }
 

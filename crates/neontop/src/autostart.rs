@@ -17,7 +17,7 @@ pub fn enabled() -> bool {
 }
 
 pub fn set(on: bool) -> Result<(), String> {
-    let p = path().ok_or("sin carpeta de configuración")?;
+    let p = path().ok_or(neontop_core::t!("sin carpeta de configuración"))?;
     if on {
         let exe = std::env::current_exe().map_err(|e| e.to_string())?;
         let exe = if exe.starts_with("/usr") { "neontop".into() } else { exe.display().to_string() };

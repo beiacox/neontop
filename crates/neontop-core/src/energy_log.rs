@@ -20,7 +20,7 @@ const SAVE_MS: u64 = 30_000;
 
 /// Id del «resto del puesto» (SAI − componentes medidos) en el histórico diario.
 pub const REST_ID: &str = "ups:rest";
-pub const REST_LABEL: &str = "Resto del puesto";
+pub const REST_LABEL: &str = crate::n!("Resto del puesto");
 
 /// Energía de un día (Wh), en total, por fuente y por hora local.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -48,18 +48,18 @@ struct Saved {
 pub fn kind_label(kind: &str) -> &'static str {
     match kind {
         "cpu" => "CPU",
-        "cpu-core" => "Núcleos",
+        "cpu-core" => crate::t!("Núcleos"),
         "uncore" => "Uncore",
         "dram" => "RAM",
-        "platform" => "Plataforma",
+        "platform" => crate::t!("Plataforma"),
         "gpu" => "GPU",
         "igpu" => "iGPU",
-        "sensor" => "Sensor",
-        "psu" => "Fuente",
-        "battery" => "Batería",
-        "charge" => "Carga",
-        "ups" => "SAI",
-        _ => "Otro",
+        "sensor" => crate::t!("Sensor"),
+        "psu" => crate::t!("Fuente"),
+        "battery" => crate::t!("Batería"),
+        "charge" => crate::t!("Carga"),
+        "ups" => crate::t!("SAI"),
+        _ => crate::t!("Otro"),
     }
 }
 

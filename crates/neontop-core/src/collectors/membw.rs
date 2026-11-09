@@ -126,7 +126,7 @@ impl MemBw {
             let mut s = shared.lock().unwrap();
             if s.status == "ok" {
                 s.status = "error".into();
-                s.message = Some("el lector de contadores se detuvo".into());
+                s.message = Some(crate::t!("el lector de contadores se detuvo").into());
             }
         });
         self.child = Some(child);

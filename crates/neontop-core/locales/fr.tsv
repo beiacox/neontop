@@ -1,0 +1,770 @@
+# NeonTop · Français. Una línea por texto: original en español<TAB>traducción.
+# Lista de textos: tools/i18n-keys.py (con --missing fr, los que faltan).
+Temperatura de CPU	Température du CPU
+Temperatura de GPU (unión)	Température du GPU (jonction)
+Uso de CPU	Utilisation du CPU
+Uso de RAM	Utilisation de la RAM
+Uso de swap	Utilisation du swap
+Sistema de ficheros lleno	Système de fichiers plein
+Temperatura de disco	Température du disque
+Corte de luz (SAI en batería)	Coupure de courant (onduleur sur batterie)
+Batería del SAI baja	Batterie de l'onduleur faible
+sistemas de ficheros	systèmes de fichiers
+discos	disques
+batería {} % · {} min de autonomía	batterie {} % · {} min d'autonomie
+{} min de autonomía	{} min d'autonomie
+ durante {} s	 pendant {} s
+{}umbral {} {}{}{}	{}seuil {} {}{}{}
+Resto del puesto	Reste du poste
+Núcleos	Cœurs
+Plataforma	Plateforme
+Sensor	Capteur
+Fuente	Alimentation
+Batería	Batterie
+Carga	Charge
+SAI	Onduleur
+Otro	Autre
+N/D	N/D
+sin datos	aucune donnée
+Excelente	Excellente
+Buena	Bonne
+Irregular	Irrégulière
+Mala	Mauvaise
+opciones de lanzamiento de cada juego	options de lancement de chaque jeu
+envoltorio de cada juego y de los juegos nuevos	wrapper de chaque jeu et des nouveaux jeux
+prefijo de comando global	préfixe de commande global
+envoltorio global de Minecraft	wrapper global de Minecraft
+Hay un juego de Steam abierto: ciérralo primero.	Un jeu Steam est ouvert : fermez-le d'abord.
+No se pudo cerrar Steam: {}	Impossible de fermer Steam : {}
+Steam no se ha cerrado en 60 s.	Steam ne s'est pas fermé en 60 s.
+Cambios aplicados, pero no se pudo volver a abrir Steam: {}	Modifications appliquées, mais impossible de rouvrir Steam : {}
+Ejecutando	En cours
+Durmiendo	En sommeil
+Espera de disco	Attente disque
+Inactivo (kernel)	Inactif (noyau)
+Zombi	Zombie
+Detenido	Arrêté
+Trazado	Tracé
+Muerto	Mort
+Desconocido	Inconnu
+Terminar	Terminer
+Matar	Tuer
+Interrumpir	Interrompre
+Recargar (HUP)	Recharger (HUP)
+Pausar	Suspendre
+Reanudar	Reprendre
+Clásicos	Classiques
+Neón	Néon
+Terminal y retro	Terminal et rétro
+De editores de código	D'éditeurs de code
+Temáticos	Thématiques
+Oscuro	Sombre
+Claro	Clair
+Alto contraste	Contraste élevé
+Fósforo verde	Phosphore vert
+Terminal ámbar	Terminal ambre
+btop clásico	btop classique
+Solarized oscuro	Solarized sombre
+Solarized claro	Solarized clair
+Papel	Papier
+Bosque	Forêt
+Océano	Océan
+Atardecer	Crépuscule
+Resumen	Aperçu
+Memoria	Mémoire
+Red	Réseau
+Procesos	Processus
+Discos	Disques
+Sensores	Capteurs
+Energía	Énergie
+Juegos	Jeux
+ · modo demo	 · mode démo
+MUESTREO	ÉCHANTILLONNAGE
+VENTANA	FENÊTRE
+up {}	actif {}
+EN PAUSA	EN PAUSE
+Silenciar 1 h	Couper 1 h
+Ignorar {}	Ignorer {}
+INICIALIZANDO SENSORES…	INITIALISATION DES CAPTEURS…
+sin carpeta de configuración	aucun dossier de configuration
+Sistema (claro/oscuro)	Système (clair/sombre)
+Notificaciones del escritorio	Notifications du bureau
+Avisos dentro de NeonTop	Alertes dans NeonTop
+Silenciadas hasta {} · reactivar	Coupées jusqu'à {} · réactiver
+Silenciar todo 1 h	Tout couper 1 h
+Restablecer	Réinitialiser
+silenciada hasta {}	coupée jusqu'à {}
+por debajo de	en dessous de
+una vez	une fois
+Vigila cada uno de los {}; pulsa para ignorar o volver a vigilar:	Surveille chacun des {} ; cliquez pour ignorer ou surveiller à nouveau :
+ÚLTIMOS AVISOS	DERNIÈRES ALERTES
+Guardado en {}	Enregistré dans {}
+No se pudo guardar: {}	Impossible d'enregistrer : {}
+Hecho.	Terminé.
+Consumo de CPU (RAPL)	Consommation du CPU (RAPL)
+permitido siempre	toujours autorisé
+permitido hasta reiniciar	autorisé jusqu'au redémarrage
+Hacer permanente	Rendre permanent
+Retirar	Retirer
+Permitir hasta reiniciar	Autoriser jusqu'au redémarrage
+Permitir siempre	Toujours autoriser
+no disponible en este equipo	indisponible sur cet ordinateur
+Tráfico de RAM en vivo	Trafic RAM en direct
+Desactivar	Désactiver
+sin permiso	sans autorisation
+Activar	Activer
+no compatible con este procesador	non compatible avec ce processeur
+no disponible	indisponible
+Inicio con el sistema	Démarrage avec le système
+Abrir NeonTop al iniciar sesión	Ouvrir NeonTop à l'ouverture de session
+Arrancar oculto en la bandeja (sigue midiendo, con alertas e interfaz web)	Démarrer masqué dans la zone de notification (mesure en continu, avec alertes et interface web)
+Si abres NeonTop cuando ya está en marcha, se muestra la ventana existente en lugar de abrir otra.	Si vous ouvrez NeonTop alors qu'il est déjà lancé, la fenêtre existante s'affiche au lieu d'en ouvrir une autre.
+Permisos de administrador	Droits d'administrateur
+Acciones de administrador (terminar o cambiar la prioridad de procesos de otros usuarios o del sistema)	Actions d'administrateur (terminer ou changer la priorité des processus d'autres utilisateurs ou du système)
+Cuando una acción necesite root, el sistema pedirá tu contraseña en su propia ventana (polkit) y la recordará unos minutos. NeonTop nunca la ve ni se ejecuta como root: solo lanza la orden concreta.	Quand une action nécessite root, le système demande votre mot de passe dans sa propre fenêtre (polkit) et s'en souvient quelques minutes. NeonTop ne le voit jamais et ne s'exécute pas en root : il lance seulement la commande concernée.
+Acceso web (teléfono y otros equipos)	Accès web (téléphone et autres ordinateurs)
+Servir la interfaz en la red local	Servir l'interface sur le réseau local
+Puerto	Port
+Aplicar	Appliquer
+activo · {} {}	actif · {} {}
+Permitir acciones desde la web (pausar, cambiar el muestreo, terminar procesos)	Autoriser les actions depuis le web (pause, échantillonnage, terminer des processus)
+En el modo demostración el servidor web no se arranca.	En mode démo, le serveur web ne démarre pas.
+Escanea el código con el teléfono (conectado a la misma red) o abre uno de estos enlaces:	Scannez le code avec le téléphone (sur le même réseau) ou ouvrez l'un de ces liens :
+Clave	Clé
+Ocultar	Masquer
+Mostrar	Afficher
+Nueva clave	Nouvelle clé
+Quien tenga el enlace con la clave puede ver los datos del equipo. La conexión no va cifrada (HTTP): úsalo en tu red de casa, no en redes públicas. Si el teléfono no conecta, puede que el cortafuegos bloquee el puerto {}.	Toute personne ayant le lien avec la clé peut voir les données de l'ordinateur. La connexion n'est pas chiffrée (HTTP) : utilisez-la sur votre réseau domestique, pas sur un réseau public. Si le téléphone ne se connecte pas, le pare-feu bloque peut-être le port {}.
+Bandeja del sistema	Zone de notification
+Cerrar la ventana la deja en la bandeja	Fermer la fenêtre la garde dans la zone de notification
+El icono de la bandeja muestra CPU, RAM, GPU y temperatura, y permite pausar o salir.	L'icône affiche CPU, RAM, GPU et température, et permet de mettre en pause ou de quitter.
+Este escritorio no tiene bandeja del sistema (StatusNotifier): cerrar la ventana cierra NeonTop.	Ce bureau n'a pas de zone de notification (StatusNotifier) : fermer la fenêtre quitte NeonTop.
+Sistema ({})	Système ({})
+Idioma	Langue
+Tema	Thème
+Efectos	Effets
+Brillo neón	Lueur néon
+Líneas de escaneo CRT	Lignes de balayage CRT
+El tema actual no usa estos efectos.	Le thème actuel n'utilise pas ces effets.
+Velocidad de actualización	Fréquence de mise à jour
+{} muestras/min	{} échantillons/min
+▶ Reanudar	▶ Reprendre
+⏸ Pausar	⏸ Pause
+Intervalos cortos (< 500 ms) muestran picos breves pero consumen más CPU.	Les intervalles courts (< 500 ms) montrent les pics brefs mais consomment plus de CPU.
+Ventana de historial	Fenêtre d'historique
+Guardado	Stocké
+{} muestras · desde {}	{} échantillons · depuis {}
+{} en {} series (32 bits)	{} dans {} séries (32 bits)
+Resolución	Résolution
+completa ~{}; lo anterior compactado ({}×)	complète ~{} ; le reste compacté ({}×)
+completa durante ~{}; después se compacta lo más antiguo	complète pendant ~{} ; ensuite le plus ancien est compacté
+Borrar historial	Effacer l'historique
+Alertas	Alertes
+Exportar	Exporter
+CSV · ventana visible	CSV · fenêtre visible
+CSV · todo el historial	CSV · tout l'historique
+Valores sin reducir en unidades base (%, bytes, bytes/s, °C, MHz, W): CPU, núcleos, memoria, red, discos, GPU, sensores y energía.	Valeurs brutes en unités de base (%, octets, octets/s, °C, MHz, W) : CPU, cœurs, mémoire, réseau, disques, GPU, capteurs et énergie.
+Acerca de	À propos
+Versión	Version
+Interfaz	Interface
+GPUI (Rust, GPU)	GPUI (Rust, GPU)
+Código	Code source
+Ajustes	Paramètres
+Uso total	Utilisation totale
+Frecuencia media	Fréquence moyenne
+Temperatura	Température
+Carga 1m	Charge 1m
+Cambios ctx/s	Changements ctx/s
+Interrupciones/s	Interruptions/s
+Forks/s	Forks/s
+{} bloqueados	{} bloqués
+Reparto del tiempo de CPU	Répartition du temps CPU
+Perfil de carga	Profil de charge
+Mapa de calor por núcleo	Carte thermique par cœur
+uso de cada hilo en la ventana de tiempo	utilisation de chaque thread sur la fenêtre de temps
+Uso radial	Utilisation radiale
+Frecuencia por núcleo	Fréquence par cœur
+GHz · ━ máx.	GHz · ━ max.
+Frecuencia en el tiempo	Fréquence dans le temps
+Temperatura y carga	Température et charge
+temperatura °C	température °C
+uso %	utilisation %
+NVMe	NVMe
+SSD SATA	SSD SATA
+HDD	HDD
+USB	USB
+Virtual	Virtuel
+Disco	Disque
+Lectura	Lecture
+Escritura	Écriture
+IOPS	IOPS
+lecturas + escrituras/s	lectures + écritures/s
+Más ocupado	Plus occupé
+Temp. máx.	Temp. max.
+discos con sensor	disques avec capteur
+Espacio usado	Espace utilisé
+{} en total	{} au total
+Sist. ficheros	Syst. fichiers
+mostrar virtuales (zram…)	afficher les virtuels (zram…)
+▼ lectura {}	▼ lecture {}
+▲ escritura {}	▲ écriture {}
+Ocupación	Occupation
+cola {}	file {}
+TIEMPO OCUPADO	TEMPS OCCUPÉ
+Operaciones por segundo	Opérations par seconde
+Latencia y cola	Latence et file d'attente
+ms por operación · profundidad media de cola	ms par opération · profondeur moyenne de file
+ · solo lectura	 · lecture seule
+ · también en {}	 · aussi sur {}
+{} usados	{} utilisés
+{} libres de {}	{} libres sur {}
+inodos {}%	inodes {}%
+Mapa de actividad	Carte d'activité
+% de tiempo ocupado de cada disco	% de temps occupé de chaque disque
+Sistemas de ficheros	Systèmes de fichiers
+Espacio por disco	Espace par disque
+usado (lleno) · libre (tenue)	utilisé (plein) · libre (pâle)
+E/S total	E/S totales
+todos los discos físicos	tous les disques physiques
+SAI: todo lo enchufado (PC, monitores…)	Onduleur : tout ce qui est branché (PC, écrans…)
+sensor de plataforma (equipo completo)	capteur de plateforme (ordinateur entier)
+fuente de alimentación (equipo completo)	alimentation (ordinateur entier)
+descarga de la batería (equipo completo)	décharge de la batterie (ordinateur entier)
+suma de componentes medidos	somme des composants mesurés
+sin fuentes medibles	aucune source mesurable
+mide todo el equipo	mesure tout l'ordinateur
+dentro de {}	inclus dans {}
+suma al total	s'ajoute au total
+potencia de carga	puissance de charge
+no suma (podría solaparse)	non ajouté (chevauchement possible)
+Permiso concedido: el consumo de la CPU aparece en la siguiente muestra.	Autorisation accordée : la consommation du CPU apparaît au prochain échantillon.
+Permiso retirado.	Autorisation retirée.
+Consumo ahora	Consommation actuelle
+CPU	CPU
+sin permiso RAPL	sans autorisation RAPL
+paquete (RAPL)	package (RAPL)
+GPU	GPU
+sin sensor	sans capteur
+Media sesión	Moyenne de session
+pico {} · mín {}	pic {} · min {}
+Sesión	Session
+Hoy	Aujourd'hui
+Este mes	Ce mois-ci
+Proyección 30 días	Projection 30 jours
+{}{} al ritmo medio	{}{} au rythme moyen
+BATERÍA BAJA	BATTERIE FAIBLE
+EN BATERÍA	SUR BATTERIE
+EN RED · CARGANDO	SUR SECTEUR · EN CHARGE
+EN RED	SUR SECTEUR
+CONSUMO DEL PUESTO	CONSOMMATION DU POSTE
+{} de {}{}	{} sur {}{}
+PC medido (CPU, GPU) {}	PC mesuré (CPU, GPU) {}
+resto: placa, RAM, discos, monitores, pérdidas… {}	reste : carte mère, RAM, disques, écrans, pertes… {}
+Autonomía	Autonomie
+{} min con esta carga	{} min avec cette charge
+Cortes	Coupures
+{} desde que arrancó apcupsd{}{}	{} depuis le démarrage d'apcupsd{}{}
+Batería de	Batterie de
+Temp.	Temp.
+Carga del SAI	Charge de l'onduleur
+MÁX {} W	MAX {} W
+BATERÍA	BATTERIE
+Red eléctrica	Secteur
+tensión de entrada (V)	tension d'entrée (V)
+Consumo de CPU bloqueado	Consommation du CPU bloquée
+Tu procesador mide su propio consumo (contadores RAPL), pero el kernel solo deja leerlos a root desde 2020, por la vulnerabilidad PLATYPUS (CVE-2020-8694): con lecturas muy frecuentes de energía, un programa local podría llegar a deducir datos que procesa la CPU. En un equipo personal de un solo usuario el riesgo es bajo, pero es tu decisión.	Votre processeur mesure sa propre consommation (compteurs RAPL), mais depuis 2020 le noyau ne laisse que root les lire, à cause de la vulnérabilité PLATYPUS (CVE-2020-8694) : avec des lectures d'énergie très fréquentes, un programme local pourrait déduire des données traitées par le CPU. Sur un ordinateur personnel à utilisateur unique, le risque est faible, mais c'est votre décision.
+Se pedirá tu contraseña en la ventana de autenticación del sistema (polkit). «Siempre» instala la regla /etc/udev/rules.d/60-neontop-rapl.rules; para revertirlo, borra ese fichero o usa «Retirar permiso».	Votre mot de passe sera demandé dans la fenêtre d'authentification du système (polkit). « Toujours » installe la règle /etc/udev/rules.d/60-neontop-rapl.rules ; pour annuler, supprimez ce fichier ou utilisez « Retirer l'autorisation ».
+Potencia por componente	Puissance par composant
+apilado = total del SAI	empilé = total de l'onduleur
+apilado = total medido	empilé = total mesuré
+Reparto de la energía	Répartition de l'énergie
+desde el arranque	depuis le démarrage
+sesión	session
+mín {} · media {} · máx {} W	min {} · moy {} · max {} W
+No se encontró ninguna fuente de consumo medible.	Aucune source de consommation mesurable trouvée.
+Todas las fuentes	Toutes les sources
+Hoy, por horas	Aujourd'hui, par heure
+Últimos 30 días	30 derniers jours
+se guarda mientras NeonTop está abierto	enregistré tant que NeonTop est ouvert
+Hace falta la potencia de la CPU para dibujar la curva.	La puissance du CPU est nécessaire pour tracer la courbe.
+Curva de eficiencia	Courbe d'efficacité
+uso de CPU frente a su potencia	utilisation du CPU face à sa puissance
+{} · límite	{} · limite
+LÍMITE {} W	LIMITE {} W
+Sin potencia de CPU ni de GPU no se puede repartir el consumo entre procesos.	Sans puissance CPU ni GPU, impossible de répartir la consommation entre les processus.
+Proceso	Processus
+Total	Total
+Acum.	Cumul
+Estimación: la potencia de la CPU se reparte según el tiempo de CPU de cada proceso y la de la GPU según el uso de sus motores; incluye el consumo en reposo repartido. «Acum.» cuenta mientras se mide la lista de procesos.{}	Estimation : la puissance du CPU est répartie selon le temps CPU de chaque processus et celle du GPU selon l'utilisation de ses moteurs ; la consommation au repos est aussi répartie. « Cumul » compte tant que la liste des processus est mesurée.{}
+ Sin permiso RAPL solo se reparte la GPU.	 Sans autorisation RAPL, seul le GPU est réparti.
+Consumo estimado por proceso	Consommation estimée par processus
+reparto de la potencia medida	répartition de la puissance mesurée
+Sesión ({})	Session ({})
+1 hora al ritmo medio	1 heure au rythme moyen
+24 horas	24 heures
+30 días	30 jours
+1 año	1 an
+Coste	Coût
+Precio por kWh	Prix par kWh
+El total es lo que mide el SAI: todo lo enchufado a él (PC, monitores y lo que tengas conectado), incluidas las pérdidas de la fuente. Es el consumo real del puesto en el enchufe.	Le total est ce que mesure l'onduleur : tout ce qui y est branché (PC, écrans et autres appareils), y compris les pertes de l'alimentation. C'est la consommation réelle du poste à la prise.
+El total es lo medido: {}. Sin un sensor del equipo completo (SAI, plataforma, fuente con sensor o batería) no se incluyen placa base, discos, ventiladores, RAM (en AMD), pérdidas de la fuente ni el monitor, así que el consumo real en el enchufe es mayor.	Le total est ce qui est mesuré : {}. Sans capteur de l'ordinateur entier (onduleur, plateforme, alimentation avec capteur ou batterie), la carte mère, les disques, les ventilateurs, la RAM (sur AMD), les pertes de l'alimentation et l'écran ne sont pas inclus : la consommation réelle à la prise est donc plus élevée.
+RAPL: acceso {}.	RAPL : accès {}.
+permanente (regla udev)	permanent (règle udev)
+hasta reiniciar	jusqu'au redémarrage
+Retirar permiso	Retirer l'autorisation
+Este procesador o kernel no expone contadores RAPL: el consumo de la CPU no se puede medir.	Ce processeur ou noyau n'expose pas de compteurs RAPL : la consommation du CPU ne peut pas être mesurée.
+Vulkan	Vulkan
+OpenGL	OpenGL
+OpenGL ES / EGL	OpenGL ES / EGL
+Media	Moyenne
+Mediana	Médiane
+10 % bajo	10 % bas
+5 % bajo	5 % bas
+1 % bajo	1 % bas
+0,1 % bajo	0,1 % bas
+Mínimo	Minimum
+Todos	Tous
+{} registros	{} enregistrements
+mejor media {} FPS · {}	meilleure moyenne {} FPS · {}
+Juego	Jeu
+Tipo	Type
+Fecha	Date
+Duración	Durée
+Estab.	Stab.
+Tirones	Saccades
+Máx °C	Max °C
+CSV	CSV
+¿Borrar?	Supprimer ?
+Historial	Historique
+partidas y benchmarks · {} {}	parties et benchmarks · {} {}
+Aún no hay nada. Cada partida se guarda sola al cerrar el juego; para una medición controlada, pulsa «Grabar benchmark».	Rien pour l'instant. Chaque partie est enregistrée automatiquement à la fermeture du jeu ; pour une mesure contrôlée, cliquez sur « Enregistrer un benchmark ».
+Pulsa un registro para ver la partida completa: FPS durante toda la partida, tirones, CPU, GPU, temperaturas, distribución de tiempos y la comparación con tus otras partidas. Se guarda en este equipo (las partidas, solas al cerrar el juego si duran más de 10 s).	Cliquez sur un enregistrement pour voir la partie complète : FPS tout au long de la partie, saccades, CPU, GPU, températures, distribution des temps et comparaison avec vos autres parties. Stocké sur cet ordinateur (les parties, automatiquement à la fermeture du jeu si elles durent plus de 10 s).
+Leyendo la configuración de los lanzadores…	Lecture de la configuration des lanceurs…
+Añadir neontop-fps automáticamente a los juegos	Ajouter neontop-fps automatiquement aux jeux
+Cada juego instalado (también los nuevos) arranca con la medición, sin tocar nada.	Chaque jeu installé (y compris les nouveaux) démarre avec la mesure, sans rien configurer.
+Desactivado: NeonTop quita lo que añadió.	Désactivé : NeonTop retire ce qu'il a ajouté.
+{}/{} juegos	{}/{} jeux
+sin activar	non activé
+● listo	● prêt
+● pendiente: se aplica al cerrar {}	● en attente : appliqué à la fermeture de {}
+● aplicando…	● application…
+Reiniciar Steam y aplicar	Redémarrer Steam et appliquer
+Cerrando Steam…	Fermeture de Steam…
+Listo: Steam se está abriendo de nuevo con los cambios.	Terminé : Steam se rouvre avec les modifications.
+Cómo medir un juego	Comment mesurer un jeu
+NeonTop mide cada fotograma con una capa propia (como MangoHud): funciona con juegos Vulkan, OpenGL y todos los de Proton/Wine (DirectX a través de DXVK y VKD3D). Se activa solo en los juegos que lances con ella: NeonTop puede ponerla por ti en Steam, Heroic, Lutris y Prism Launcher.	NeonTop mesure chaque image avec sa propre couche (comme MangoHud) : elle fonctionne avec les jeux Vulkan, OpenGL et tous ceux de Proton/Wine (DirectX via DXVK et VKD3D). Elle n'est active que dans les jeux lancés avec elle : NeonTop peut la configurer pour vous dans Steam, Heroic, Lutris et Prism Launcher.
+A mano (otros lanzadores o terminal)	À la main (autres lanceurs ou terminal)
+Steam	Steam
+Propiedades del juego → General → Opciones de lanzamiento:	Propriétés du jeu → Général → Options de lancement :
+Combinable: neontop-fps gamemoderun mangohud %command%	Combinable : neontop-fps gamemoderun mangohud %command%
+Lutris, Heroic, Prism	Lutris, Heroic, Prism
+Comando envoltorio / prefijo de comando:	Commande wrapper / préfixe de commande :
+Lutris: Opciones del sistema · Heroic: Avanzado · Prism Launcher: Comandos personalizados	Lutris : Options système · Heroic : Avancé · Prism Launcher : Commandes personnalisées
+Terminal	Terminal
+● Capa instalada. Abre un juego con la opción de arriba y aparecerá aquí automáticamente.	● Couche installée. Lancez un jeu avec l'option ci-dessus et il apparaîtra ici automatiquement.
+● La capa no está instalada (se instala con el paquete de NeonTop).	● La couche n'est pas installée (elle est fournie avec le paquet NeonTop).
+← Volver	← Retour
+Registro no encontrado	Enregistrement introuvable
+Este registro ya no está en el historial.	Cet enregistrement n'est plus dans l'historique.
+BENCHMARK	BENCHMARK
+PARTIDA	PARTIE
+¿Borrar? Confirmar	Supprimer ? Confirmer
+Borrar	Supprimer
+{} fotogramas	{} images
+Mín / máx	Min / max
+FPS por segundo	FPS par seconde
+{}/min · {} parones	{}/min · {} blocages
+Ritmo	Cadence
+variación entre fotogramas	variation entre images
+Estabilidad	Stabilité
+CPU / GPU	CPU / GPU
+{} W · máx {}/{} °C	{} W · max {}/{} °C
+Sin datos detallados	Pas de données détaillées
+Este registro se guardó con una versión anterior de NeonTop, que solo guardaba el resumen. Las partidas nuevas se guardan completas.	Cet enregistrement a été créé par une ancienne version de NeonTop qui ne gardait que le résumé. Les nouvelles parties sont enregistrées en entier.
+FPS durante la partida	FPS pendant la partie
+FPS	FPS
+1 % bajo (5 s)	1 % bas (5 s)
+Peor fotograma	Pire image
+ms · los picos son tirones	ms · les pics sont des saccades
+CPU y GPU	CPU et GPU
+Temperaturas	Températures
+Potencia de la GPU	Puissance du GPU
+Distribución de tiempos	Distribution des temps
+escala logarítmica · rojo = tirón	échelle logarithmique · rouge = saccade
+ ms	 ms
+FPS por percentil	FPS par centile
+Benchmarks de este juego	Benchmarks de ce jeu
+Partidas de este juego	Parties de ce jeu
+FPS medios · la resaltada es esta	FPS moyens · celle en surbrillance est celle-ci
+Limitado por la GPU	Limité par le GPU
+GPU al {} %: la tarjeta gráfica es el techo. Bajar resolución o calidad gráfica sube los FPS.	GPU à {} % : la carte graphique est le plafond. Baisser la résolution ou la qualité graphique augmente les FPS.
+Tope de FPS / sincronía vertical (~{} FPS)	Limite de FPS / synchro verticale (~{} FPS)
+Ritmo muy constante con la GPU al {} %: hay un límite de FPS o VSync activo.	Cadence très régulière avec le GPU à {} % : une limite de FPS ou la VSync est active.
+Limitado por la CPU	Limité par le CPU
+Un núcleo al {} % con la GPU al {} %: el hilo principal del juego no da más.	Un cœur à {} % avec le GPU à {} % : le thread principal du jeu est saturé.
+Sin un límite claro	Pas de limite nette
+GPU {} % · núcleo más cargado {} %. Puede influir el motor, la red o el disco.	GPU {} % · cœur le plus chargé {} %. Le moteur, le réseau ou le disque peuvent jouer.
+en pausa	en pause
+2 min	2 min
+5 min	5 min
+Resumen final de la partida · guardado en el historial	Résumé final de la partie · enregistré dans l'historique
+Cerrar	Fermer
+● GRABANDO · quedan {} s	● ENREGISTREMENT · reste {} s
+● GRABANDO · {} s	● ENREGISTREMENT · {} s
+Detener	Arrêter
+● Grabar benchmark	● Enregistrer un benchmark
+Reiniciar	Réinitialiser
+SESIÓN TERMINADA · {}	SESSION TERMINÉE · {}
+EN PAUSA / MINIMIZADO	EN PAUSE / RÉDUIT
+{} ms por fotograma	{} ms par image
+midiendo…	mesure…
+60 FPS	60 FPS
+30 FPS	30 FPS
+Tiempos de fotograma	Temps d'image
+últimos 10 s · mediana {} ms	10 dernières s · médiane {} ms
+● tirón (> 2× mediana)	● saccade (> 2× médiane)
+FPS durante la sesión	FPS pendant la session
+1 % bajo ({} s)	1 % bas ({} s)
+ESTABILIDAD	STABILITÉ
+Constancia	Régularité
+{} % (1 % bajo / media)	{} % (1 % bas / moyenne)
+Parones	Blocages
+Qué limita los FPS	Ce qui limite les FPS
+El juego se ha cerrado.	Le jeu a été fermé.
+Midiendo…	Mesure en cours…
+El juego está en pausa o minimizado.	Le jeu est en pause ou réduit.
+Proceso del juego	Processus du jeu
+{} % (de un núcleo)	{} % (d'un cœur)
+Hilos	Threads
+RAM	RAM
+VRAM	VRAM
+Prioridad	Priorité
+nice {}	nice {}
+No se ve el proceso {} (puede estar en otro espacio de nombres, p. ej. dentro de un contenedor de Steam).	Le processus {} n'est pas visible (il peut être dans un autre espace de noms, p. ex. dans un conteneur Steam).
+Reloj GPU	Horloge GPU
+Potencia	Puissance
+Temp. GPU	Temp. GPU
+Temp. CPU	Temp. CPU
+sesión completa	session complète
+Último benchmark	Dernier benchmark
+{} parones	{} blocages
+GPU / CPU	GPU / CPU
+Comparado con la grabación anterior de este juego ({}).	Comparé à l'enregistrement précédent de ce jeu ({}).
+Medición automática	Mesure automatique
+Gráficos 3D	Graphismes 3D
+Render 3D	Rendu 3D
+Cómputo	Calcul
+Decodificación	Décodage
+Codificación	Encodage
+Codificación 2	Encodage 2
+Vídeo (VCN)	Vidéo (VCN)
+JPEG	JPEG
+Vídeo	Vidéo
+Mejora de vídeo	Amélioration vidéo
+Copia (DMA)	Copie (DMA)
+Copia	Copie
+AMD	AMD
+NVIDIA	NVIDIA
+Intel	Intel
+No se ha detectado ninguna GPU compatible.	Aucun GPU compatible détecté.
+NeonTop soporta AMD (amdgpu), NVIDIA (driver propietario, vía NVML) e Intel (i915/xe).	NeonTop prend en charge AMD (amdgpu), NVIDIA (pilote propriétaire, via NVML) et Intel (i915/xe).
+Uso GPU	Utilisation GPU
+Controlador VRAM	Contrôleur VRAM
+actividad del bus de memoria	activité du bus mémoire
+Tráfico VRAM	Trafic VRAM
+estimado	estimé
+Memoria GPU	Mémoire GPU
+VRAM usada	VRAM utilisée
+de {}	sur {}
+suma de procesos	somme des processus
+GTT	GTT
+RAM del sistema usada por la GPU	RAM système utilisée par le GPU
+Reloj núcleo	Horloge du cœur
+ MHz	 MHz
+máx. {} MHz	max. {} MHz
+límite {} W	limite {} W
+unión {}° · mem {}°	jonction {}° · mém {}°
+⚠ Bajando relojes por:	⚠ Baisse des fréquences due à :
+Motores	Moteurs
+desglose por motor (fdinfo)	détail par moteur (fdinfo)
+contadores globales	compteurs globaux
+El driver no informa del uso por motor.	Le pilote ne fournit pas l'utilisation par moteur.
+Motores en el tiempo	Moteurs dans le temps
+PID	PID
+Ningún proceso visible está usando esta GPU.	Aucun processus visible n'utilise ce GPU.
+Datos de NVML.	Données NVML.
+Datos de /proc/*/fdinfo: solo se ven los procesos de tu usuario (los de root, como algunos servidores gráficos, no aparecen).	Données de /proc/*/fdinfo : seuls les processus de votre utilisateur sont visibles (ceux de root, comme certains serveurs graphiques, n'apparaissent pas).
+Ningún proceso visible usa VRAM ahora mismo.	Aucun processus visible n'utilise de VRAM actuellement.
+Procesos en la GPU	Processus sur le GPU
+VRAM por proceso	VRAM par processus
+Tráfico de VRAM	Trafic VRAM
+pico teórico {}	pic théorique {}
+ahora {}	actuel {}
+Estimación: actividad del controlador de memoria × ancho de banda al reloj actual ({}, {} bits). El eje llega al máximo teórico para ver la proporción.	Estimation : activité du contrôleur mémoire × bande passante à l'horloge actuelle ({}, {} bits). L'axe va jusqu'au maximum théorique pour voir la proportion.
+Uso del bus de VRAM	Utilisation du bus VRAM
+DEL MÁXIMO	DU MAXIMUM
+Tráfico PCIe	Trafic PCIe
+▼ hacia la GPU {}	▼ vers le GPU {}
+▲ desde la GPU {}	▲ depuis le GPU {}
+Enlace	Lien
+integrada (sin PCIe externo)	intégré (pas de PCIe externe)
+Máximo	Maximum
+Pico	Pic
+{} por sentido	{} par sens
+Tráfico	Trafic
+no expuesto por el driver	non exposé par le pilote
+Bus PCIe	Bus PCIe
+El tráfico PCIe en vivo solo lo publica NVML (NVIDIA); amdgpu e Intel no lo exponen en estas generaciones.	Le trafic PCIe en direct n'est publié que par NVML (NVIDIA) ; amdgpu et Intel ne l'exposent pas sur ces générations.
+VRAM (pico)	VRAM (pic)
+VRAM (ahora)	VRAM (actuel)
+RAM (test)	RAM (test)
+PCIe (pico)	PCIe (pic)
+GPU vs memoria	GPU vs mémoire
+motor gráfico	moteur graphique
+controlador VRAM	contrôleur VRAM
+Anchos de banda del sistema	Bandes passantes du système
+escala logarítmica	échelle logarithmique
+Ejecuta el test de RAM (pestaña Memoria) para compararla aquí.	Lancez le test RAM (onglet Mémoire) pour la comparer ici.
+Memoria de vídeo	Mémoire vidéo
+POTENCIA	PUISSANCE
+Relojes	Horloges
+núcleo	cœur
+Tarjeta	Carte
+Modelo	Modèle
+Driver	Pilote
+Ranura	Emplacement
+Ventilador	Ventilateur
+borde {}°	bord {}°
+unión {}°	jonction {}°
+memoria {}°	mémoire {}°
+Apps	Applis
+Compartida	Partagée
+Buffers	Tampons
+Caché	Cache
+Libre	Libre
+En uso	Utilisée
+Disponible	Disponible
+Swap	Swap
+sin swap	sans swap
+Dirty	Dirty
+writeback {}	writeback {}
+Zswap	Zswap
+comprime {}	compresse {}
+Comprometida	Engagée
+Activa (anon)	Active (anon)
+Inactiva (anon)	Inactive (anon)
+Activa (ficheros)	Active (fichiers)
+Inactiva (ficheros)	Inactive (fichiers)
+Mapeada	Mappée
+Slab	Slab
+Tablas de páginas	Tables de pages
+Pilas del kernel	Piles du noyau
+del máximo	du maximum
+test: {}	test : {}
+ejecuta el test	lancez le test
+Contadores del Data Fabric de AMD: tráfico real entre el controlador de memoria y la DRAM (lectura y escritura juntas; este procesador no las separa).	Compteurs Data Fabric d'AMD : trafic réel entre le contrôleur mémoire et la DRAM (lecture et écriture ensemble ; ce processeur ne les sépare pas).
+Contadores del controlador de memoria de Intel (uncore_imc).	Compteurs du contrôleur mémoire Intel (uncore_imc).
+Falta cargar el módulo del kernel que expone los contadores del controlador de memoria (amd_uncore).	Le module noyau qui expose les compteurs du contrôleur mémoire (amd_uncore) n'est pas chargé.
+Leer los contadores de todo el sistema requiere un permiso de administrador (CAP_PERFMON).	Lire les compteurs de tout le système nécessite une autorisation d'administrateur (CAP_PERFMON).
+El controlador de memoria no expone contadores en este sistema.	Le contrôleur mémoire n'expose pas de compteurs sur ce système.
+Este procesador no tiene contadores de tráfico de memoria compatibles (soportados: AMD Zen 2/Zen 3 e Intel con uncore_imc).	Ce processeur n'a pas de compteurs de trafic mémoire compatibles (pris en charge : AMD Zen 2/Zen 3 et Intel avec uncore_imc).
+No se encuentra el lector de contadores (neontop-membw); reinstala el paquete de NeonTop.	Le lecteur de compteurs (neontop-membw) est introuvable ; réinstallez le paquet NeonTop.
+Iniciando…	Démarrage…
+Activar (pide contraseña)	Activer (demande le mot de passe)
+Se hará como administrador, una sola vez: cargar el módulo amd_uncore (y dejarlo para cada arranque en /etc/modules-load.d/neontop-membw.conf) y dar a /usr/lib/neontop/neontop-membw el permiso CAP_PERFMON, que solo permite leer contadores de rendimiento. NeonTop no se ejecuta como root.	Fait une seule fois en administrateur : charger le module amd_uncore (et le garder à chaque démarrage dans /etc/modules-load.d/neontop-membw.conf) et donner à /usr/lib/neontop/neontop-membw l'autorisation CAP_PERFMON, qui permet seulement de lire les compteurs de performance. NeonTop ne s'exécute pas en root.
+↻ Repetir test	↻ Relancer le test
+▶ Ejecutar test	▶ Lancer le test
+Mide el máximo que da tu RAM leyendo, escribiendo y copiando {} con todos los hilos (~1–2 s de carga). El uso real en cada momento está en «Tráfico de RAM en vivo».	Mesure le maximum de votre RAM en lisant, écrivant et copiant {} avec tous les threads (~1–2 s de charge). L'utilisation réelle à chaque instant est dans « Trafic RAM en direct ».
+512 MiB	512 Mio
+{} hilos	{} threads
+lectura + escritura	lecture + écriture
+Lectura 1 hilo	Lecture 1 thread
+un solo núcleo	un seul cœur
+LATENCIA	LATENCE
+acceso aleatorio a memoria	accès mémoire aléatoire
+Composición	Composition
+Historial de memoria	Historique mémoire
+Mapa de RAM	Carte de la RAM
+cada celda ≈ {}	chaque case ≈ {}
+Desglose del kernel	Détail du noyau
+caché {}	cache {}
+SWAP	SWAP
+Swap y escritura pendiente	Swap et écritures en attente
+Presión de memoria	Pression mémoire
+PSI avg10	PSI avg10
+contadores del controlador de memoria	compteurs du contrôleur mémoire
+Ancho de banda de RAM	Bande passante RAM
+test bajo demanda	test à la demande
+Permiso concedido: la medición empieza en unos segundos.	Autorisation accordée : la mesure commence dans quelques secondes.
+Desactivado.	Désactivé.
+mostrar virtuales	afficher les virtuelles
+Bajada	Réception
+Subida	Envoi
+Pico bajada	Pic réception
+en la ventana	dans la fenêtre
+Pico subida	Pic envoi
+Sesión ▼	Session ▼
+desde arranque {}	depuis le démarrage {}
+Sesión ▲	Session ▲
+Paquetes/s	Paquets/s
+entrada / salida	entrée / sortie
+Errores	Erreurs
+descartes {}	rejets {}
+Ancho de banda · {}	Bande passante · {}
+▼ bajada	▼ réception
+▲ subida	▲ envoi
+Estado	État
+MAC	MAC
+MTU	MTU
+IPs	IP
+Paquetes por segundo	Paquets par seconde
+Uso del enlace	Utilisation du lien
+de {} Mbps	sur {} Mbps
+velocidad desconocida	vitesse inconnue
+ENLACE	LIEN
+de la sesión, por interfaz	de la session, par interface
+TCP establecidos	TCP établis
+TCP escuchando	TCP en écoute
+UDP	UDP
+Todas las interfaces	Toutes les interfaces
+Sockets	Sockets
+MEM	MÉM
+USO	UTIL.
+Historial CPU	Historique CPU
+user · system · iowait	user · system · iowait
+{} físicos · {} hilos	{} physiques · {} threads
+apps · shmem · buffers · caché	applis · shmem · tampons · cache
+Presión (PSI)	Pression (PSI)
+avg10 · some	avg10 · some
+% de tiempo en que alguna tarea estuvo esperando por el recurso.	% du temps où une tâche attendait la ressource.
+Carga media	Charge moyenne
+Sistema	Système
+Host	Hôte
+SO	OS
+Kernel	Noyau
+{} total · {} ejecutando · {} bloqueados	{} au total · {} en cours · {} bloqués
+{} TCP establecidos · {} escuchando · {} UDP	{} TCP établis · {} en écoute · {} UDP
+Top procesos	Top processus
+por CPU (% de un núcleo) · por memoria	par CPU (% d'un cœur) · par mémoire
+Nombre	Nom
+Usuario	Utilisateur
+Est.	Ét.
+T. CPU	T. CPU
+Filtrar por nombre, comando, usuario o PID…	Filtrer par nom, commande, utilisateur ou PID…
+{}: señal enviada a {}	{} : signal envoyé à {}
+Prioridad de {}: nice {}	Priorité de {} : nice {}
+TERMINADO	TERMINÉ
+E/S disco	E/S disque
+{} (uid {})	{} (uid {})
+Padre	Parent
+ · {} hijos	 · {} enfants
+{} · nice {}	{} · nice {}
+Iniciado	Démarré
+hace {}	il y a {}
+Ir al padre: {}	Aller au parent : {}
+SEÑALES	SIGNAUX
+¿{}? Confirmar	{} ? Confirmer
+PRIORIDAD (NICE)	PRIORITÉ (NICE)
+Valores más bajos = más prioridad. Bajar el nice requiere privilegios de root.	Valeurs plus basses = plus de priorité. Baisser le nice nécessite les privilèges root.
+{} del kernel	{} du noyau
+Espera disco	Attente disque
+Zombis	Zombies
+Usuarios	Utilisateurs
+CPU procesos	CPU processus
+suma / núcleos	somme / cœurs
+Árbol	Arbre
+Hilos del kernel	Threads du noyau
+% por núcleo	% par cœur
+Desplegar todo	Tout déplier
+{} filas	{} lignes
+LEYENDO /proc…	LECTURE DE /proc…
+Detalle	Détails
+Top CPU	Top CPU
+clic para seleccionar	cliquer pour sélectionner
+CPU × memoria	CPU × mémoire
+Memoria por aplicación	Mémoire par application
+suma de sus procesos	somme de ses processus
+CPU por usuario	CPU par utilisateur
+CPU total	CPU totale
+Estados	États
+ RPM	 tr/min
+Más caliente	Plus chaud
+{} sensores de temperatura	{} capteurs de température
+Ventilador {}	Ventilateur {}
+máx. {} RPM	max. {} tr/min
+Potencia {}	Puissance {}
+Chips	Puces
+Mapa térmico	Carte thermique
+% del límite crítico de cada sensor	% de la limite critique de chaque capteur
+valor / límite crítico	valeur / limite critique
+Historial de temperaturas	Historique des températures
+máx {}{} · crít {}{}	max {}{} · crit {}{}
+máx {}{}	max {}{}
+crít {}{}	crit {}{}
+Ventiladores y potencia	Ventilateurs et puissance
+límite {}°	limite {}°
+Batería {}	Batterie {}
+ · conectado a corriente	 · sur secteur
+CARGA	CHARGE
+Salud	Santé
+{}% del diseño	{}% de la capacité nominale
+Ciclos	Cycles
+Sensores de placa base	Capteurs de la carte mère
+No se detectan sensores de la placa base (ventiladores de caja, voltajes, temperatura del chipset). Suelen requerir un módulo del kernel según el chip: nct6775 (Nuvoton, la mayoría de placas ASUS/MSI/ASRock), it87 (ITE, Gigabyte) o asus_ec_sensors. Puedes detectarlo con «sudo sensors-detect» (paquete lm_sensors); NeonTop los mostrará automáticamente al cargarse.	Aucun capteur de carte mère détecté (ventilateurs du boîtier, tensions, température du chipset). Ils nécessitent souvent un module noyau selon la puce : nct6775 (Nuvoton, la plupart des cartes ASUS/MSI/ASRock), it87 (ITE, Gigabyte) ou asus_ec_sensors. Vous pouvez le détecter avec « sudo sensors-detect » (paquet lm_sensors) ; NeonTop les affichera automatiquement une fois chargés.
+Mostrar NeonTop	Afficher NeonTop
+▶ Reanudar muestreo	▶ Reprendre l'échantillonnage
+⏸ Pausar muestreo	⏸ Suspendre l'échantillonnage
+Salir de NeonTop	Quitter NeonTop
+NeonTop · iniciando…	NeonTop · démarrage…
+No se pudo abrir el puerto {}: {}	Impossible d'ouvrir le port {} : {}
+Abre el enlace (o escanea el código QR) que aparece en Ajustes → Acceso web del equipo.	Ouvrez le lien (ou scannez le code QR) affiché sur l'ordinateur dans Paramètres → Accès web.
+clave de acceso	clé d'accès
+Entrar	Entrer
+Esperando la primera muestra…	En attente du premier échantillon…
+Cargando la lista de procesos…	Chargement de la liste des processus…
+Ningún juego medido ahora mismo.	Aucun jeu mesuré en ce moment.
+Consumo	Consommation
+Fuentes	Sources
+con red	sur secteur
+batería {} % · {} min · red {} V	batterie {} % · {} min · secteur {} V
+{} · activo {} · muestreo {}	{} · actif {} · échantillonnage {}
+ · EN PAUSA	 · EN PAUSE
+NeonTop (modo demo)	NeonTop (mode démo)
+CPU de demostración · 6 núcleos	CPU de démo · 6 cœurs
+GPU de demostración	GPU de démo
+SSD NVMe de demostración	SSD NVMe de démo
+HDD de demostración	HDD de démo
+NVMe de demostración	NVMe de démo
+Juego de demostración	Jeu de démo
+umbral	seuil
+durante	pendant
+repetir	répéter
+ambos	les deux
+app	appli
+escritorio	bureau
+zram (swap comprimida)	zram (swap compressé)
+CPU paquete {}	CPU package {}
+CPU (paquete)	CPU (package)
+Núcleos de CPU	Cœurs du CPU
+Memoria RAM	Mémoire RAM
+Plataforma (SoC completo)	Plateforme (SoC complet)
+el lector de contadores se detuvo	le lecteur de compteurs s'est arrêté
+Operación no permitida (el proceso es de otro usuario o requiere root)	Opération non permise (le processus appartient à un autre utilisateur ou nécessite root)
+Permiso denegado (bajar el nice requiere privilegios)	Permission refusée (baisser le nice nécessite des privilèges)
+El proceso ya no existe	Le processus n'existe plus
+Señal desconocida: {}	Signal inconnu : {}
+No se permite enviar señales a init	L'envoi de signaux à init n'est pas autorisé
+Disco {}	Disque {}
+Placa base	Carte mère
+esta partida no tiene datos detallados	cette partie n'a pas de données détaillées
+ · resolución {} W	 · résolution {} W
+ (nominal {} V)	 (nominale {} V)
+contador	compteur
+sensor	capteur
+partida	partie
+partidas	parties
+ · {} bench.	 · {} bench.
+benchmark	benchmark
+registro	enregistrement
+registros	enregistrements
+compartida	partagée

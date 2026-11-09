@@ -51,9 +51,9 @@ Además:
 - **Muestreo configurable** de 100 ms a 60 s y ventana de historial de 1 minuto a **ilimitada**.
 - **Acceso web**: abre NeonTop desde el teléfono u otro equipo de la red (código QR, clave de acceso, acciones opcionales). Las páginas y sus gráficas SVG se generan en Rust en el propio equipo: el navegador no ejecuta JavaScript.
 - **Alertas** configurables (disco casi lleno, temperatura, SAI en batería…) con notificaciones del sistema.
-- **Bandeja del sistema**, arranque con la sesión, instancia única y exportación a CSV.
+- **Bandeja del sistema** (cerrar la ventana la deja midiendo en la bandeja; el icono la vuelve a abrir), arranque con la sesión, instancia única y exportación a CSV.
 - Interfaz **nativa en la GPU** con [GPUI](https://gpui.rs) (el motor de Zed): ~40 MiB y un proceso, frente a los cientos de MiB y los procesos de WebKit de la versión anterior. Se adapta al ancho de la ventana (4, 2 o 1 columnas).
-- Todo en **español**.
+- **Multilingüe**: español, inglés, portugués, francés y alemán. Por defecto sigue el idioma del sistema; se cambia en Ajustes → Idioma (o `--lang en` para una ejecución).
 
 ## Capturas
 
@@ -136,8 +136,9 @@ cargo test --workspace                                 # pruebas
 
 ## Desarrollo
 
-- **Modo demostración**: `neontop --demo` simula un equipo completo con un juego en marcha ([`demo.rs`](crates/neontop-core/src/demo.rs), determinista). Argumentos: `--tab <id>` y `--theme <id>`; `NEONTOP_SIZE=1600x1000` fija el tamaño de la ventana.
+- **Modo demostración**: `neontop --demo` simula un equipo completo con un juego en marcha ([`demo.rs`](crates/neontop-core/src/demo.rs), determinista). Argumentos: `--tab <id>`, `--theme <id>` y `--lang <código>`; `NEONTOP_SIZE=1600x1000` fija el tamaño de la ventana.
 - **Pruebas**: `cargo test --workspace` (historial, estadísticas de FPS, energía, alertas, temas, procesos, servidor web, capa de FPS y su formato de memoria compartida…). `cargo clippy --workspace --all-targets` sin avisos.
+- **Traducciones**: el texto original (y la clave) es el español; cada texto visible pasa por `t!("…")` (o `n!("…")` en tablas `const`) y sus traducciones están en [`crates/neontop-core/locales/`](crates/neontop-core/locales) (`original<TAB>traducción`). [`tools/i18n-keys.py --missing de`](tools/i18n-keys.py) lista lo que falta en un idioma, y la prueba `every_text_is_translated` falla si falta un texto o no coinciden sus huecos `{}`.
 - **Capturas sin tocar tu escritorio**: [`tools/qa-shot.sh`](tools/qa-shot.sh) abre un KWin anidado con pantalla virtual, lanza NeonTop dentro y lo captura:
   `dbus-run-session -- tools/qa-shot.sh captura.png 1600 1000 6 target/debug/neontop --demo --tab cpu`
 - **Probar la capa de FPS**: [`tools/qa-fps.sh`](tools/qa-fps.sh) hace lo mismo con un programa y lee su memoria compartida:

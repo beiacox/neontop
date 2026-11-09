@@ -348,7 +348,7 @@ fn steam(add: Option<bool>) -> Option<LauncherStatus> {
         }
         applied += best;
     }
-    Some(LauncherStatus { id: "steam", name: "Steam", total, applied, running: run, scope: "opciones de lanzamiento de cada juego" })
+    Some(LauncherStatus { id: "steam", name: "Steam", total, applied, running: run, scope: crate::t!("opciones de lanzamiento de cada juego") })
 }
 
 fn count_steam(text: &str, games: &[String]) -> usize {
@@ -428,7 +428,7 @@ fn heroic(add: Option<bool>) -> Option<LauncherStatus> {
                 }
         }
     }
-    Some(LauncherStatus { id: "heroic", name: "Heroic", total, applied, running: run, scope: "envoltorio de cada juego y de los juegos nuevos" })
+    Some(LauncherStatus { id: "heroic", name: "Heroic", total, applied, running: run, scope: crate::t!("envoltorio de cada juego y de los juegos nuevos") })
 }
 
 // ───────────────────────────── Lutris ─────────────────────────────
@@ -491,7 +491,7 @@ fn lutris(add: Option<bool>) -> Option<LauncherStatus> {
                 Err(e) => eprintln!("NeonTop: no se pudo escribir {}: {e}", path.display()),
             }
         }
-    Some(LauncherStatus { id: "lutris", name: "Lutris", total: 1, applied: has as usize, running: run, scope: "prefijo de comando global" })
+    Some(LauncherStatus { id: "lutris", name: "Lutris", total: 1, applied: has as usize, running: run, scope: crate::t!("prefijo de comando global") })
 }
 
 // ───────────────────────────── Prism Launcher ─────────────────────────────
@@ -533,7 +533,7 @@ fn prism(add: Option<bool>) -> Option<LauncherStatus> {
                 Err(e) => eprintln!("NeonTop: no se pudo escribir {}: {e}", path.display()),
             }
         }
-    Some(LauncherStatus { id: "prism", name: "Prism Launcher", total: 1, applied: has as usize, running: run, scope: "envoltorio global de Minecraft" })
+    Some(LauncherStatus { id: "prism", name: "Prism Launcher", total: 1, applied: has as usize, running: run, scope: crate::t!("envoltorio global de Minecraft") })
 }
 
 // ───────────────────────────── Conjunto ─────────────────────────────
@@ -572,16 +572,16 @@ fn steam_game_running() -> bool {
 /// Cierra Steam, aplica los cambios y lo vuelve a abrir (en segundo plano, a la bandeja).
 pub fn restart_steam(cfg: &ConfigStore) -> Result<FpsAuto, String> {
     if steam_game_running() {
-        return Err("Hay un juego de Steam abierto: ciérralo primero.".into());
+        return Err(crate::t!("Hay un juego de Steam abierto: ciérralo primero.").into());
     }
     if running(&["steam"]) {
-        std::process::Command::new("steam").arg("-shutdown").spawn().map_err(|e| format!("No se pudo cerrar Steam: {e}"))?;
+        std::process::Command::new("steam").arg("-shutdown").spawn().map_err(|e| crate::t!("No se pudo cerrar Steam: {}", e))?;
         let mut waited = 0;
         while running(&["steam"]) {
             std::thread::sleep(Duration::from_millis(500));
             waited += 1;
             if waited > 120 {
-                return Err("Steam no se ha cerrado en 60 s.".into());
+                return Err(crate::t!("Steam no se ha cerrado en 60 s.").into());
             }
         }
     }
@@ -596,7 +596,7 @@ pub fn restart_steam(cfg: &ConfigStore) -> Result<FpsAuto, String> {
             Ok(())
         });
     }
-    cmd.spawn().map_err(|e| format!("Cambios aplicados, pero no se pudo volver a abrir Steam: {e}"))?;
+    cmd.spawn().map_err(|e| crate::t!("Cambios aplicados, pero no se pudo volver a abrir Steam: {}", e))?;
     Ok(res)
 }
 

@@ -1,6 +1,7 @@
 //! Discos: cifras totales, tarjeta por disco (elegir uno), E/S, ocupación, operaciones,
 //! latencia, mapa de actividad y sistemas de ficheros.
 
+use neontop_core::t;
 use gpui::{div, prelude::*, px, AnyElement, Context, FontWeight, SharedString, Window};
 use neontop_core::format as fmt;
 
@@ -12,12 +13,12 @@ use crate::ui::theme::{fade, Th};
 
 fn kind(k: &str) -> (&'static str, &'static str) {
     match k {
-        "nvme" => ("▰", "NVMe"),
-        "ssd" => ("▭", "SSD SATA"),
-        "hdd" => ("◉", "HDD"),
-        "usb" => ("⏏", "USB"),
-        "virtual" => ("◇", "Virtual"),
-        _ => ("◇", "Disco"),
+        "nvme" => ("▰", t!("NVMe")),
+        "ssd" => ("▭", t!("SSD SATA")),
+        "hdd" => ("◉", t!("HDD")),
+        "usb" => ("⏏", t!("USB")),
+        "virtual" => ("◇", t!("Virtual")),
+        _ => ("◇", t!("Disco")),
     }
 }
 
@@ -40,11 +41,11 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
     let wkeys: Vec<String> = real.iter().map(|d| format!("disk.{}.w", d.name)).collect();
     let (rsum, wsum) = (hsum(st, &rkeys), hsum(st, &wkeys));
     let stats = vec![
-        kit::stat("Lectura", fmt::rate(read), "", th.cyan, Some(rsum.clone()), cx).into_any_element(),
-        kit::stat("Escritura", fmt::rate(write), "", th.magenta, Some(wsum.clone()), cx).into_any_element(),
-        kit::stat("IOPS", fmt::num(iops), "lecturas + escrituras/s", th.lime, None, cx).into_any_element(),
+        kit::stat(t!("Lectura"), fmt::rate(read), "", th.cyan, Some(rsum.clone()), cx).into_any_element(),
+        kit::stat(t!("Escritura"), fmt::rate(write), "", th.magenta, Some(wsum.clone()), cx).into_any_element(),
+        kit::stat(t!("IOPS"), fmt::num(iops), t!("lecturas + escrituras/s"), th.lime, None, cx).into_any_element(),
         kit::stat(
-            "Más ocupado",
+            t!("Más ocupado"),
             busiest.map(|d| fmt::pct(d.util as f64, 0)).unwrap_or("—".into()),
             busiest.map(|d| d.name.clone()).unwrap_or_default(),
             th.load_color(busiest.map(|d| d.util).unwrap_or(0.0)),
@@ -52,9 +53,9 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
             cx,
         )
         .into_any_element(),
-        kit::stat("Temp. máx.", max_temp.map(|t| format!("{t:.0}°C")).unwrap_or("N/D".into()), "discos con sensor", th.temp_color(max_temp.unwrap_or(0.0)), None, cx).into_any_element(),
+        kit::stat(t!("Temp. máx."), max_temp.map(|t| format!("{t:.0}°C")).unwrap_or(t!("N/D").into()), t!("discos con sensor"), th.temp_color(max_temp.unwrap_or(0.0)), None, cx).into_any_element(),
         kit::stat(
-            "Espacio usado",
+            t!("Espacio usado"),
             fmt::pct(fs_used as f64 / fs_total.max(1) as f64 * 100.0, 0),
             format!("{} / {}", fmt::bytes_digits(fs_used as f64, 0), fmt::bytes_digits(fs_total as f64, 0)),
             th.amber,
@@ -62,8 +63,8 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
             cx,
         )
         .into_any_element(),
-        kit::stat("Discos", real.len().to_string(), format!("{} en total", fmt::bytes(capacity as f64)), th.violet, None, cx).into_any_element(),
-        kit::stat("Sist. ficheros", s.disks.filesystems.len().to_string(), "montados", th.teal, None, cx).into_any_element(),
+        kit::stat(t!("Discos"), real.len().to_string(), t!("{} en total", fmt::bytes(capacity as f64)), th.violet, None, cx).into_any_element(),
+        kit::stat(t!("Sist. ficheros"), s.disks.filesystems.len().to_string(), "montados", th.teal, None, cx).into_any_element(),
     ];
 
     let per_row = (kit::cols(cx) * 2).clamp(1, 4) as u16;
@@ -119,39 +120,39 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
                         .child(div().child(format!("{:.0}%", d.util))),
                 )
         })))
-        .child(kit::toggle("disk-virtual", show_virtual, "mostrar virtuales (zram…)", cx, cx.listener(|this, _, _, cx| {
+        .child(kit::toggle("disk-virtual", show_virtual, t!("mostrar virtuales (zram…)"), cx, cx.listener(|this, _, _, cx| {
             this.disk_virtual = !this.disk_virtual;
             cx.notify();
         })));
 
     let mut g = kit::grid(cx).child(kit::stats_row(stats, cx)).child(cards);
     if let Some(d) = sel {
-        let k = |n: &str| format!("disk.{}.{n}", d.name);
+        let k = |n: &str| format!("disk.{}.{}", d.name, n);
         g = g
             .child(
                 Panel::new(format!("E/S · {}", d.name), th.cyan)
                     .span(3)
-                    .extra(kit::legend(vec![(format!("▼ lectura {}", fmt::rate(d.read_rate)), th.cyan), (format!("▲ escritura {}", fmt::rate(d.write_rate)), th.magenta)]))
+                    .extra(kit::legend(vec![(t!("▼ lectura {}", fmt::rate(d.read_rate)), th.cyan), (t!("▲ escritura {}", fmt::rate(d.write_rate)), th.magenta)]))
                     .child(Plot::new(vec![Line::new(hv(st, &k("r")), th.cyan).fill().width(2.), Line::new(hv(st, &k("w")), th.magenta).fill().width(2.).negate()], t.clone()).y_fmt(y_rate).bytes().height(240.).into_element()),
             )
-            .child(Panel::new("Ocupación", th.load_color(d.util)).child(charts::gauge(
+            .child(Panel::new(t!("Ocupación"), th.load_color(d.util)).child(charts::gauge(
                 d.util / 100.0,
                 th.load_color(d.util),
                 fmt::pct(d.util as f64, 1),
-                format!("cola {:.2}", d.queue),
-                "TIEMPO OCUPADO".into(),
+                t!("cola {}", format!("{:.2}", d.queue)),
+                t!("TIEMPO OCUPADO").into(),
                 250.,
             )))
             .child(
-                Panel::new("Operaciones por segundo", th.lime)
+                Panel::new(t!("Operaciones por segundo"), th.lime)
                     .span(2)
                     .extra(kit::legend(vec![("lecturas/s".into(), th.lime), ("escrituras/s".into(), th.amber)]))
                     .child(Plot::new(vec![Line::new(hv(st, &k("riops")), th.lime).fill(), Line::new(hv(st, &k("wiops")), th.amber).fill().negate()], t.clone()).y_fmt(y_num).height(200.).into_element()),
             )
             .child(
-                Panel::new("Latencia y cola", th.amber)
+                Panel::new(t!("Latencia y cola"), th.amber)
                     .span(2)
-                    .extra("ms por operación · profundidad media de cola")
+                    .extra(t!("ms por operación · profundidad media de cola"))
                     .child(
                         Plot::new(vec![Line::new(hv(st, &k("rlat")), th.cyan), Line::new(hv(st, &k("wlat")), th.magenta), Line::new(hv(st, &k("queue")), th.amber).dashed().width(1.)], t.clone())
                             .height(200.)
@@ -167,10 +168,10 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
         let c = fs_color(pct);
         let mut extra = format!("{} · {}", f.device, f.fstype);
         if f.readonly {
-            extra.push_str(" · solo lectura");
+            extra.push_str(t!(" · solo lectura"));
         }
         if !f.other_mounts.is_empty() {
-            extra.push_str(&format!(" · también en {}", f.other_mounts.join(", ")));
+            extra.push_str(&t!(" · también en {}", f.other_mounts.join(", ")));
         }
         div()
             .flex()
@@ -190,9 +191,9 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
                 div()
                     .flex()
                     .gap(px(14.))
-                    .child(kit::muted(format!("{} usados", fmt::bytes(f.used as f64)), cx))
-                    .child(kit::muted(format!("{} libres de {}", fmt::bytes(f.avail as f64), fmt::bytes(f.total as f64)), cx))
-                    .when(f.inodes_total > 0, |d| d.child(kit::muted(format!("inodos {:.0}%", (f.inodes_total - f.inodes_free) as f64 / f.inodes_total as f64 * 100.0), cx))),
+                    .child(kit::muted(t!("{} usados", fmt::bytes(f.used as f64)), cx))
+                    .child(kit::muted(t!("{} libres de {}", fmt::bytes(f.avail as f64), fmt::bytes(f.total as f64)), cx))
+                    .when(f.inodes_total > 0, |d| d.child(kit::muted(t!("inodos {}%", format!("{:.0}", (f.inodes_total - f.inodes_free) as f64 / f.inodes_total as f64 * 100.0)), cx))),
             )
     }));
     // espacio por disco: cada sistema de ficheros como fracción de la capacidad del disco
@@ -208,13 +209,13 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
             .child(charts::segments(parts, 12.))
             .child(kit::legend(fss.iter().enumerate().map(|(i, f)| (format!("{} {}", f.mount, fmt::bytes(f.used as f64)), th.series(i))).collect()))
     }));
-    g.child(Panel::new("Mapa de actividad", th.violet).span(4).extra("% de tiempo ocupado de cada disco").child(charts::heatmap(rows, labels, (disks.len() as f32 * 22.0).max(90.))))
-        .child(Panel::new("Sistemas de ficheros", th.amber).span(2).child(fslist))
-        .child(Panel::new("Espacio por disco", th.magenta).span(2).extra("usado (lleno) · libre (tenue)").child(space))
+    g.child(Panel::new(t!("Mapa de actividad"), th.violet).span(4).extra(t!("% de tiempo ocupado de cada disco")).child(charts::heatmap(rows, labels, (disks.len() as f32 * 22.0).max(90.))))
+        .child(Panel::new(t!("Sistemas de ficheros"), th.amber).span(2).child(fslist))
+        .child(Panel::new(t!("Espacio por disco"), th.magenta).span(2).extra(t!("usado (lleno) · libre (tenue)")).child(space))
         .child(
-            Panel::new("E/S total", th.teal)
+            Panel::new(t!("E/S total"), th.teal)
                 .span(4)
-                .extra("todos los discos físicos")
+                .extra(t!("todos los discos físicos"))
                 .child(Plot::new(vec![Line::new(rsum, th.cyan).fill(), Line::new(wsum, th.magenta).fill().negate()], t).y_fmt(y_rate).bytes().height(180.).into_element()),
         )
         .into_any_element()

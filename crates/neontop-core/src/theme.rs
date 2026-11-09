@@ -98,11 +98,11 @@ pub enum Category {
 }
 
 pub const CATEGORIES: [(Category, &str); 5] = [
-    (Category::Clasico, "Clásicos"),
-    (Category::Neon, "Neón"),
-    (Category::Terminal, "Terminal y retro"),
-    (Category::Editor, "De editores de código"),
-    (Category::Tematico, "Temáticos"),
+    (Category::Clasico, crate::n!("Clásicos")),
+    (Category::Neon, crate::n!("Neón")),
+    (Category::Terminal, crate::n!("Terminal y retro")),
+    (Category::Editor, crate::n!("De editores de código")),
+    (Category::Tematico, crate::n!("Temáticos")),
 ];
 
 #[derive(Clone, Copy, Debug, PartialEq)]

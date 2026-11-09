@@ -99,11 +99,11 @@ fn scan_rapl() -> (Vec<RaplZone>, &'static str) {
             let name = read_trim(dir.join("name"))?;
             let pkg_no = |s: &str| s.rsplit('-').next().and_then(|x| x.parse::<u32>().ok()).unwrap_or(0);
             let (label, kind) = match name.as_str() {
-                s if s.starts_with("package") => (if packages > 1 { format!("CPU paquete {}", pkg_no(s)) } else { "CPU (paquete)".into() }, "cpu"),
-                "core" => ("Núcleos de CPU".into(), "cpu-core"),
+                s if s.starts_with("package") => (if packages > 1 { crate::t!("CPU paquete {}", pkg_no(s)) } else { crate::t!("CPU (paquete)").into() }, "cpu"),
+                "core" => (crate::t!("Núcleos de CPU").into(), "cpu-core"),
                 "uncore" => ("Uncore / iGPU".into(), "uncore"),
-                "dram" => ("Memoria RAM".into(), "dram"),
-                "psys" => ("Plataforma (SoC completo)".into(), "platform"),
+                "dram" => (crate::t!("Memoria RAM").into(), "dram"),
+                "psys" => (crate::t!("Plataforma (SoC completo)").into(), "platform"),
                 other => (other.to_string(), "cpu-core"),
             };
             // intel-rapl:0:1 cuelga de intel-rapl:0

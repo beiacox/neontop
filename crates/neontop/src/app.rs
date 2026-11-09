@@ -1,6 +1,7 @@
 //! Ventana principal: barra lateral con las pestañas, cabecera (muestreo, ventana de tiempo,
 //! pausa, reloj), contenido de la pestaña, avisos de alertas y panel de Ajustes.
 
+use neontop_core::t;
 use gpui::{
     canvas, div, fill, point, prelude::*, px, size, AnyElement, App, Bounds, Context, Decorations, Entity, FontWeight, Hsla, MouseButton, ResizeEdge, ScrollHandle,
     SharedString, Subscription, Tiling, Window, WindowBackgroundAppearance, WindowBounds, WindowDecorations, WindowOptions,
@@ -17,16 +18,16 @@ use crate::ui::theme::{fade, Th};
 
 /// Pestañas: id, nombre e icono.
 pub const TABS: [(&str, &str, &str); 10] = [
-    ("overview", "Resumen", "◈"),
+    ("overview", neontop_core::n!("Resumen"), "◈"),
     ("cpu", "CPU", "▦"),
-    ("mem", "Memoria", "▤"),
-    ("net", "Red", "⇅"),
-    ("procs", "Procesos", "≣"),
-    ("disks", "Discos", "◎"),
-    ("sensors", "Sensores", "✺"),
+    ("mem", neontop_core::n!("Memoria"), "▤"),
+    ("net", neontop_core::n!("Red"), "⇅"),
+    ("procs", neontop_core::n!("Procesos"), "≣"),
+    ("disks", neontop_core::n!("Discos"), "◎"),
+    ("sensors", neontop_core::n!("Sensores"), "✺"),
     ("gpu", "GPU", "▣"),
-    ("energy", "Energía", "ϟ"),
-    ("games", "Juegos", "◭"),
+    ("energy", neontop_core::n!("Energía"), "ϟ"),
+    ("games", neontop_core::n!("Juegos"), "◭"),
 ];
 
 /// Recogidas caras que necesita cada pestaña (procesos, uso de GPU por proceso).
@@ -131,6 +132,7 @@ impl Root {
         let demo = self.state.read(cx).demo;
         let mut items: Vec<AnyElement> = Vec::new();
         for (id, label, icon) in TABS {
+            let label = neontop_core::i18n::t(label);
             let on = id == cur;
             let hint = tab_hint(id, &snap, &self.state.read(cx).model);
             let item = div()
@@ -163,7 +165,7 @@ impl Root {
             .child(div().text_color(th.cyan).child("NEON"))
             .child(div().text_color(th.magenta).child("TOP"))
             .on_mouse_down(MouseButton::Left, |_, window, _| window.start_window_move());
-        let version = format!("v{}{}", env!("CARGO_PKG_VERSION"), if demo { " · modo demo" } else { "" });
+        let version = format!("v{}{}", env!("CARGO_PKG_VERSION"), if demo { t!(" · modo demo") } else { "" });
         if wide {
             div()
                 .w(px(190.))
@@ -215,7 +217,7 @@ impl Root {
         let th = Th::get(cx).clone();
         let st = self.state.read(cx);
         let tab = st.ui.tab.clone();
-        let title = TABS.iter().find(|t| t.0 == tab).map(|t| t.1).unwrap_or("NeonTop");
+        let title = TABS.iter().find(|t| t.0 == tab).map(|t| neontop_core::i18n::t(t.1)).unwrap_or("NeonTop");
         let info = &st.model.info;
         let paused = st.paused();
         let interval = st.ui.interval_ms;
@@ -243,13 +245,13 @@ impl Root {
                     .on_click(cx.listener(|this, _, _, cx| this.state.update(cx, |s, cx| s.toggle_pause(cx)))),
             )
             .child(
-                div().flex().items_center().gap(px(6.)).child(kit::muted("MUESTREO", cx).text_size(px(9.))).child(kit::segmented("iv", intervals, &interval, cx, move |ms, _, cx| {
+                div().flex().items_center().gap(px(6.)).child(kit::muted(t!("MUESTREO"), cx).text_size(px(9.))).child(kit::segmented("iv", intervals, &interval, cx, move |ms, _, cx| {
                     let ms = *ms;
                     s1.update(cx, |s, cx| s.set_interval(ms, cx));
                 })),
             )
             .child(
-                div().flex().items_center().gap(px(6.)).child(kit::muted("VENTANA", cx).text_size(px(9.))).child(kit::segmented("win", windows, &win, cx, move |w, _, cx| {
+                div().flex().items_center().gap(px(6.)).child(kit::muted(t!("VENTANA"), cx).text_size(px(9.))).child(kit::segmented("win", windows, &win, cx, move |w, _, cx| {
                     let w = *w;
                     s2.update(cx, |s, cx| s.set_window(w, cx));
                 })),
@@ -261,7 +263,7 @@ impl Root {
                     .flex_col()
                     .items_end()
                     .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(th.dsize(17.))).text_color(th.magenta).child(if ts > 0 { fmt::clock(ts) } else { "--:--:--".into() }))
-                    .child(div().text_size(px(9.5)).text_color(th.muted).font_family(th.mono.clone()).child(format!("up {}", fmt::duration(uptime)))),
+                    .child(div().text_size(px(9.5)).text_color(th.muted).font_family(th.mono.clone()).child(t!("up {}", fmt::duration(uptime)))),
             );
         div()
             .id("header")
@@ -293,7 +295,7 @@ impl Root {
                             .items_center()
                             .gap(px(10.))
                             .child(div().font_family(th.display.clone()).font_weight(FontWeight::BOLD).text_size(px(th.dsize(20.))).text_color(th.text).child(th.title(title)))
-                            .when(paused, |d| d.child(kit::badge("EN PAUSA", th.amber))),
+                            .when(paused, |d| d.child(kit::badge(t!("EN PAUSA"), th.amber))),
                     )
                     .when(!narrow, |d| d.child(div().text_size(px(10.)).text_color(th.muted).font_family(th.mono.clone()).truncate().child(sub))),
             )
@@ -326,7 +328,7 @@ impl Root {
                         .flex()
                         .flex_wrap()
                         .gap(px(6.))
-                        .child(kit::button(SharedString::from(format!("mute-{id}")), "Silenciar 1 h", th.text, cx).on_click(cx.listener(move |this, _, _, cx| {
+                        .child(kit::button(SharedString::from(format!("mute-{id}")), t!("Silenciar 1 h"), th.text, cx).on_click(cx.listener(move |this, _, _, cx| {
                             let rule = rule.clone();
                             this.state.update(cx, |s, cx| {
                                 let now = fmt::now_ms();
@@ -335,7 +337,7 @@ impl Root {
                             });
                         })))
                         .when(!key.is_empty(), |d| {
-                            d.child(kit::button(SharedString::from(format!("ign-{id}")), format!("Ignorar {key}"), th.text, cx).on_click(cx.listener(move |this, _, _, cx| {
+                            d.child(kit::button(SharedString::from(format!("ign-{id}")), t!("Ignorar {}", key), th.text, cx).on_click(cx.listener(move |this, _, _, cx| {
                                 let (rule, key) = (rule2.clone(), key2.clone());
                                 this.state.update(cx, |s, cx| {
                                     s.model.alerts.ignore(&rule, &key);
@@ -522,7 +524,7 @@ impl Render for Root {
             .overflow_y_scroll()
             .track_scroll(&self.scroll)
             .p(px(if cols == 1 { 10. } else { 16. }))
-            .child(if ready { body } else { kit::empty("INICIALIZANDO SENSORES…", cx).into_any_element() });
+            .child(if ready { body } else { kit::empty(t!("INICIALIZANDO SENSORES…"), cx).into_any_element() });
         let main = div().flex_1().min_w_0().h_full().flex().flex_col().child(self.header(window, cols == 1, wide, cx)).child(content);
         let csd = matches!(window.window_decorations(), Decorations::Client { .. });
         let layout = if wide {

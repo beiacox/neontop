@@ -123,7 +123,7 @@ fn scan() -> Vec<DiskStatic> {
             let vendor = read_trim(base.join("device/vendor")).unwrap_or_default();
             let model = read_trim(base.join("device/model")).unwrap_or_default();
             let model = match (vendor.as_str(), model.as_str()) {
-                (_, "") if name.starts_with("zram") => "zram (swap comprimida)".to_string(),
+                (_, "") if name.starts_with("zram") => crate::t!("zram (swap comprimida)").to_string(),
                 ("", m) => m.to_string(),
                 // los discos NVMe/ATA no suelen traer vendor útil; los USB sí ("JMicron", "Seagate"…)
                 (v, m) if v.eq_ignore_ascii_case("ATA") || m.starts_with(v) => m.to_string(),

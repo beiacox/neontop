@@ -6,7 +6,7 @@ use super::*;
 pub static THEMES: &[Theme] = &[
     Theme {
         id: "oscuro",
-        name: "Oscuro",
+        name: crate::n!("Oscuro"),
         category: Category::Clasico,
         light: false,
         colors: Palette { bg: 0x0d1117, panel: 0x161b22, dim: 0x21262d, cyan: 0x58a6ff, magenta: 0xdb61a2, lime: 0x3fb950, amber: 0xd29922, violet: 0xa371f7, red: 0xf85149, blue: 0x388bfd, teal: 0x39c5cf, orange: 0xf0883e, text: 0xe6edf3, muted: 0x7d8590 },
@@ -27,7 +27,7 @@ pub static THEMES: &[Theme] = &[
     },
     Theme {
         id: "claro",
-        name: "Claro",
+        name: crate::n!("Claro"),
         category: Category::Clasico,
         light: true,
         colors: Palette { bg: 0xf3f5f8, panel: 0xffffff, dim: 0xe3e7ed, cyan: 0x0969da, magenta: 0xbf3989, lime: 0x1a7f37, amber: 0x9a6700, violet: 0x8250df, red: 0xcf222e, blue: 0x0550ae, teal: 0x1b7c83, orange: 0xbc4c00, text: 0x1f2328, muted: 0x656d76 },
@@ -48,7 +48,7 @@ pub static THEMES: &[Theme] = &[
     },
     Theme {
         id: "contraste",
-        name: "Alto contraste",
+        name: crate::n!("Alto contraste"),
         category: Category::Clasico,
         light: false,
         colors: Palette { bg: 0x000000, panel: 0x000000, dim: 0x333333, cyan: 0x00ffff, magenta: 0xff4dff, lime: 0x00ff00, amber: 0xffff00, violet: 0xc7a6ff, red: 0xff5050, blue: 0x6fb5ff, teal: 0x00ffc8, orange: 0xffa31a, text: 0xffffff, muted: 0xd0d0d0 },
@@ -69,7 +69,7 @@ pub static THEMES: &[Theme] = &[
     },
     Theme {
         id: "neon",
-        name: "Neón",
+        name: crate::n!("Neón"),
         category: Category::Neon,
         light: false,
         colors: Palette { bg: 0x07060d, panel: 0x0e0b1e, dim: 0x1c1a33, cyan: 0x00f0ff, magenta: 0xff2bd6, lime: 0xb6ff00, amber: 0xffb800, violet: 0x9d4dff, red: 0xff3860, blue: 0x3d7bff, teal: 0x00ffa3, orange: 0xff7a00, text: 0xd8e1ff, muted: 0x6b6f9a },
@@ -174,7 +174,7 @@ pub static THEMES: &[Theme] = &[
     },
     Theme {
         id: "matrix",
-        name: "Fósforo verde",
+        name: crate::n!("Fósforo verde"),
         category: Category::Terminal,
         light: false,
         colors: Palette { bg: 0x010802, panel: 0x041208, dim: 0x0b2412, cyan: 0x00ff41, magenta: 0xb3ff00, lime: 0xe2ff7a, amber: 0xffe066, violet: 0x00b37a, red: 0xff3b3b, blue: 0x00d9a3, teal: 0x5cffb0, orange: 0xd4ff00, text: 0xb8ffc8, muted: 0x3f7a4f },
@@ -195,7 +195,7 @@ pub static THEMES: &[Theme] = &[
     },
     Theme {
         id: "ambar",
-        name: "Terminal ámbar",
+        name: crate::n!("Terminal ámbar"),
         category: Category::Terminal,
         light: false,
         colors: Palette { bg: 0x0c0700, panel: 0x140c00, dim: 0x2b1a00, cyan: 0xffb000, magenta: 0xff7a00, lime: 0xffd27a, amber: 0xffe0a0, violet: 0xff9f40, red: 0xff4d1a, blue: 0xe0a040, teal: 0xffc864, orange: 0xff8c00, text: 0xffc766, muted: 0x8a6420 },
@@ -216,7 +216,7 @@ pub static THEMES: &[Theme] = &[
     },
     Theme {
         id: "btop",
-        name: "btop clásico",
+        name: crate::n!("btop clásico"),
         category: Category::Terminal,
         light: false,
         colors: Palette { bg: 0x0b0b0b, panel: 0x141414, dim: 0x262626, cyan: 0x4fd64f, magenta: 0xe05a5a, lime: 0xb4e04f, amber: 0xe0c34f, violet: 0x8d7cd6, red: 0xff3b3b, blue: 0x5fa8e0, teal: 0x4fd6b4, orange: 0xe0934f, text: 0xe0e0e0, muted: 0x7a7a7a },
@@ -363,7 +363,7 @@ pub static THEMES: &[Theme] = &[
     },
     Theme {
         id: "solarized-oscuro",
-        name: "Solarized oscuro",
+        name: crate::n!("Solarized oscuro"),
         category: Category::Editor,
         light: false,
         colors: Palette { bg: 0x002b36, panel: 0x073642, dim: 0x0e4552, cyan: 0x2aa198, magenta: 0xd33682, lime: 0x859900, amber: 0xb58900, violet: 0x6c71c4, red: 0xdc322f, blue: 0x268bd2, teal: 0x3fb8a9, orange: 0xcb4b16, text: 0x93a1a1, muted: 0x657b83 },
@@ -384,7 +384,7 @@ pub static THEMES: &[Theme] = &[
     },
     Theme {
         id: "solarized-claro",
-        name: "Solarized claro",
+        name: crate::n!("Solarized claro"),
         category: Category::Editor,
         light: true,
         colors: Palette { bg: 0xeee8d5, panel: 0xfdf6e3, dim: 0xe4ddc8, cyan: 0x268bd2, magenta: 0xd33682, lime: 0x859900, amber: 0xb58900, violet: 0x6c71c4, red: 0xdc322f, blue: 0x2aa198, teal: 0x3fb8a9, orange: 0xcb4b16, text: 0x586e75, muted: 0x93a1a1 },
@@ -405,7 +405,7 @@ pub static THEMES: &[Theme] = &[
     },
     Theme {
         id: "papel",
-        name: "Papel",
+        name: crate::n!("Papel"),
         category: Category::Tematico,
         light: true,
         colors: Palette { bg: 0xf1e8d2, panel: 0xfbf6e9, dim: 0xe3d8bd, cyan: 0x2f5d7c, magenta: 0x9c3d54, lime: 0x5b7a3a, amber: 0xb0772b, violet: 0x6b4f8a, red: 0xa8322d, blue: 0x3d6f9e, teal: 0x3b7d74, orange: 0xb8612a, text: 0x3b3226, muted: 0x8a7c66 },
@@ -426,7 +426,7 @@ pub static THEMES: &[Theme] = &[
     },
     Theme {
         id: "bosque",
-        name: "Bosque",
+        name: crate::n!("Bosque"),
         category: Category::Tematico,
         light: false,
         colors: Palette { bg: 0x0f1a14, panel: 0x16241c, dim: 0x22362a, cyan: 0x7cc68d, magenta: 0xd98e73, lime: 0xb5d86b, amber: 0xe3c16f, violet: 0x9aa7d9, red: 0xe06c5a, blue: 0x6fa8c7, teal: 0x5fb8a5, orange: 0xd9975a, text: 0xe4eadf, muted: 0x7f9585 },
@@ -447,7 +447,7 @@ pub static THEMES: &[Theme] = &[
     },
     Theme {
         id: "oceano",
-        name: "Océano",
+        name: crate::n!("Océano"),
         category: Category::Tematico,
         light: false,
         colors: Palette { bg: 0x06141f, panel: 0x0b2030, dim: 0x123049, cyan: 0x3ecfe0, magenta: 0x7a8cff, lime: 0x4fe0b0, amber: 0xffd479, violet: 0x9d8cff, red: 0xff6b7d, blue: 0x3d8bff, teal: 0x2bb5a8, orange: 0xff9f6b, text: 0xdcefff, muted: 0x6f8ba3 },
@@ -468,7 +468,7 @@ pub static THEMES: &[Theme] = &[
     },
     Theme {
         id: "atardecer",
-        name: "Atardecer",
+        name: crate::n!("Atardecer"),
         category: Category::Tematico,
         light: false,
         colors: Palette { bg: 0x1b1024, panel: 0x26162f, dim: 0x3a2244, cyan: 0xff9a5c, magenta: 0xff5c8a, lime: 0xffd166, amber: 0xffb347, violet: 0xb07cff, red: 0xff4757, blue: 0x6c8dff, teal: 0x5fd4c0, orange: 0xff7043, text: 0xfbe4d8, muted: 0xa08195 },

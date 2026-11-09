@@ -10,6 +10,7 @@ pub mod energy_log;
 pub mod format;
 pub mod fps;
 pub mod history;
+pub mod i18n;
 pub mod helper;
 pub mod launchers;
 pub mod model;

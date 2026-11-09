@@ -90,7 +90,7 @@ pub fn gbs(bps: f64, digits: usize) -> String {
 /// Potencia: `"12.3 W"`, sin decimales a partir de 100 W; `"N/D"` si no se conoce.
 pub fn watts(w: Option<f64>) -> String {
     match w {
-        None => "N/D".into(),
+        None => crate::t!("N/D").into(),
         Some(w) if w >= 100.0 => format!("{w:.0} W"),
         Some(w) => format!("{w:.1} W"),
     }

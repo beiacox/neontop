@@ -5,6 +5,7 @@
 //!   --demo         datos simulados (revisar temas y maquetación sin datos reales)
 //!   --autostart    arranque con la sesión (puede quedarse en la bandeja)
 //!   --tab <id>     pestaña inicial;  --theme <id>  tema (solo para esta ejecución)
+//!   --lang <código> idioma (es, en, pt, fr, de) solo para esta ejecución
 
 mod app;
 mod autostart;
@@ -42,6 +43,7 @@ fn main() {
     let autostarted = args.iter().any(|a| a == autostart::ARG);
     let tab = arg_value(&args, "--tab");
     let theme_override = arg_value(&args, "--theme");
+    let lang_override = arg_value(&args, "--lang");
 
     Application::new().run(move |cx| {
         ui::theme::load_fonts(cx);
@@ -49,6 +51,7 @@ fn main() {
         let (st, tx) = state::init(cx, demo);
         {
             let s = st.read(cx);
+            neontop_core::i18n::init(lang_override.as_deref().or(s.ui.lang.as_deref()));
             let theme = theme_override.clone().unwrap_or_else(|| s.ui.theme.clone());
             ui::theme::apply(cx, &theme, s.ui.glow, s.ui.scanlines);
         }

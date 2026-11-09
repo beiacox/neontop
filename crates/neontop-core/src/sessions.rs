@@ -84,7 +84,7 @@ impl Sessions {
 
     pub fn load(&self, id: &str) -> Result<Value, String> {
         valid_id(id)?;
-        let s = fs::read_to_string(self.dir()?.join(format!("{id}.json"))).map_err(|_| "esta partida no tiene datos detallados".to_string())?;
+        let s = fs::read_to_string(self.dir()?.join(format!("{id}.json"))).map_err(|_| crate::t!("esta partida no tiene datos detallados").to_string())?;
         serde_json::from_str(&s).map_err(|e| e.to_string())
     }
 
