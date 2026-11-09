@@ -251,8 +251,19 @@ fn renice(this: &mut Root, pid: u32, cx: &mut Context<Root>) {
     .detach();
 }
 
+/// Columnas que caben: todas en ventanas anchas; menos en las estrechas (sin desplazamiento lateral).
+fn visible_cols(cols: usize) -> Vec<Col> {
+    match cols {
+        1 => vec![Col::Name, Col::Pid, Col::Cpu, Col::Mem],
+        2 => vec![Col::Name, Col::Pid, Col::User, Col::Cpu, Col::Mem, Col::Threads, Col::Time],
+        _ => COLS.iter().map(|c| c.0).collect(),
+    }
+}
+
 fn table(root: &mut Root, cpu_div: f32, cx: &mut Context<Root>) -> impl IntoElement {
     let th = Th::get(cx).clone();
+    let visible = visible_cols(kit::cols(cx));
+    let vis2 = visible.clone();
     let v = &root.procs;
     let header = div()
         .flex()
@@ -263,7 +274,7 @@ fn table(root: &mut Root, cpu_div: f32, cx: &mut Context<Root>) -> impl IntoElem
         .text_size(px(10.))
         .font_family(th.mono.clone())
         .text_color(th.muted)
-        .children(COLS.iter().map(|&(col, label, w)| {
+        .children(COLS.iter().filter(|c| visible.contains(&c.0)).map(|&(col, label, w)| {
             let on = v.sort == col;
             let right = !matches!(col, Col::Name | Col::User | Col::State);
             let arrow = if on { if v.desc { " ▼" } else { " ▲" } } else { "" };
@@ -300,7 +311,7 @@ fn table(root: &mut Root, cpu_div: f32, cx: &mut Context<Root>) -> impl IntoElem
                     let cpu = p.cpu / cpu_div;
                     let on = sel == Some(pid);
                     let (_, sc) = proc_state(&p.state);
-                    let toggle = r.has_children.then(|| {
+                    let mut toggle = r.has_children.then(|| {
                         div()
                             .id(SharedString::from(format!("t-{pid}")))
                             .w(px(14.))
@@ -336,24 +347,27 @@ fn table(root: &mut Root, cpu_div: f32, cx: &mut Context<Root>) -> impl IntoElem
                             }
                             cx.notify();
                         }))
-                        .child(
-                            cell(0.0, false)
-                                .flex()
-                                .items_center()
-                                .gap(px(2.))
-                                .child(div().text_color(fade(th.muted, 0.7)).child(r.guide.clone()))
-                                .children(toggle)
-                                .child(div().truncate().text_color(if p.kernel { th.muted } else { th.text }).child(p.name.clone())),
-                        )
-                        .child(cell(64., true).text_color(th.muted).child(pid.to_string()))
-                        .child(cell(90., false).truncate().text_color(if p.uid == 0 { th.amber } else { th.text }).child(p.user.clone()))
-                        .child(cell(40., false).text_color(th.slot(sc)).child(p.state.clone()))
-                        .child(cell(64., true).text_color(th.load_color(cpu)).child(format!("{cpu:.1}")))
-                        .child(cell(84., true).text_color(th.magenta).child(fmt::bytes(p.mem as f64)))
-                        .child(cell(52., true).child(p.threads.to_string()))
-                        .child(cell(84., true).text_color(th.muted).child(p.read_rate.map(fmt::rate).unwrap_or("—".into())))
-                        .child(cell(84., true).text_color(th.muted).child(p.write_rate.map(fmt::rate).unwrap_or("—".into())))
-                        .child(cell(80., true).text_color(th.muted).child(fmt::duration(p.cpu_time)))
+                        .children(vis2.iter().map(|&col| -> gpui::AnyElement {
+                            match col {
+                                Col::Name => cell(0.0, false)
+                                    .flex()
+                                    .items_center()
+                                    .gap(px(2.))
+                                    .child(div().text_color(fade(th.muted, 0.7)).child(r.guide.clone()))
+                                    .children(toggle.take())
+                                    .child(div().truncate().text_color(if p.kernel { th.muted } else { th.text }).child(p.name.clone()))
+                                    .into_any_element(),
+                                Col::Pid => cell(64., true).text_color(th.muted).child(pid.to_string()).into_any_element(),
+                                Col::User => cell(90., false).truncate().text_color(if p.uid == 0 { th.amber } else { th.text }).child(p.user.clone()).into_any_element(),
+                                Col::State => cell(40., false).text_color(th.slot(sc)).child(p.state.clone()).into_any_element(),
+                                Col::Cpu => cell(64., true).text_color(th.load_color(cpu)).child(format!("{cpu:.1}")).into_any_element(),
+                                Col::Mem => cell(84., true).text_color(th.magenta).child(fmt::bytes(p.mem as f64)).into_any_element(),
+                                Col::Threads => cell(52., true).child(p.threads.to_string()).into_any_element(),
+                                Col::Read => cell(84., true).text_color(th.muted).child(p.read_rate.map(fmt::rate).unwrap_or("—".into())).into_any_element(),
+                                Col::Write => cell(84., true).text_color(th.muted).child(p.write_rate.map(fmt::rate).unwrap_or("—".into())).into_any_element(),
+                                Col::Time => cell(80., true).text_color(th.muted).child(fmt::duration(p.cpu_time)).into_any_element(),
+                            }
+                        }))
                 })
                 .collect::<Vec<_>>()
         }),
@@ -361,7 +375,7 @@ fn table(root: &mut Root, cpu_div: f32, cx: &mut Context<Root>) -> impl IntoElem
     .track_scroll(v.scroll.clone())
     .w_full()
     .h(px(520.));
-    div().flex().flex_col().w_full().min_w(px(860.)).child(header).child(list)
+    div().flex().flex_col().w_full().child(header).child(list)
 }
 
 fn detail(root: &Root, p: &ProcInfo, alive: bool, cpu_div: f32, all: &[ProcInfo], uptime: f64, cx: &mut Context<Root>) -> impl IntoElement {
@@ -534,7 +548,7 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
         .span(if shown.is_some() { 3 } else { 4 })
         .extra(format!("{} filas", root.procs.rows.len()))
         .child(toolbar)
-        .child(if all.is_empty() { kit::empty("LEYENDO /proc…", cx).into_any_element() } else { div().id("ptable").overflow_x_scroll().child(table(root, cpu_div, cx)).into_any_element() });
+        .child(if all.is_empty() { kit::empty("LEYENDO /proc…", cx).into_any_element() } else { table(root, cpu_div, cx).into_any_element() });
 
     let mut g = kit::grid(cx).child(kit::stats_row(stats, cx)).child(table_panel);
     if let Some(p) = shown.clone() {

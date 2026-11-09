@@ -442,6 +442,72 @@ impl Demo {
     }
 }
 
+/// Estado simulado de la medición automática en los lanzadores.
+pub fn fps_auto() -> crate::launchers::FpsAuto {
+    use crate::launchers::LauncherStatus;
+    crate::launchers::FpsAuto {
+        enabled: true,
+        launchers: vec![
+            LauncherStatus { id: "steam", name: "Steam", total: 20, applied: 19, running: true, scope: "opciones de lanzamiento de cada juego" },
+            LauncherStatus { id: "heroic", name: "Heroic", total: 29, applied: 29, running: false, scope: "envoltorio de cada juego y de los juegos nuevos" },
+            LauncherStatus { id: "lutris", name: "Lutris", total: 1, applied: 1, running: false, scope: "prefijo de comando global" },
+        ],
+    }
+}
+
+/// Historial de partidas simulado (varios juegos, nombres largos) para revisar la pestaña Juegos.
+pub fn history(now_ms: u64) -> Vec<crate::fps::Benchmark> {
+    const GAMES: [(&str, &str, &str, f32, u32); 12] = [
+        ("Cyberpunk 2077", "Cyberpunk2077.exe", "vulkan", 104.4, 3),
+        ("Just Cause 4", "JustCause4.exe", "vulkan", 56.8, 2),
+        ("BOOST VECTOR EX Demo", "BoostVector.exe", "vulkan", 96.5, 1),
+        ("FINAL FANTASY RESONANCE DEMO", "ffresonance.exe", "vulkan", 160.5, 1),
+        ("Minecraft", "java", "opengl", 161.0, 10),
+        ("FlightSimulator", "FlightSimulator.exe", "vulkan", 99.0, 4),
+        ("VaM", "VaM.exe", "vulkan", 1463.0, 1),
+        ("VaM2", "VaM2.exe", "vulkan", 124.0, 4),
+        ("REDlauncher", "REDlauncher.exe", "vulkan", 32.0, 4),
+        ("ff7remake_", "ff7remake_.exe", "vulkan", 99.0, 1),
+        ("eldenring", "eldenring.exe", "vulkan", 57.0, 1),
+        ("No Man's Sky", "NMS.exe", "vulkan", 87.2, 2),
+    ];
+    let mut out = Vec::new();
+    let mut k = 0u64;
+    for (title, exe, api, avg, n) in GAMES {
+        for i in 0..n {
+            k += 1;
+            let seconds = 300.0 + (k * 977 % 9000) as f64;
+            let a = avg * (0.9 + (i as f32 * 0.07) % 0.2);
+            out.push(crate::fps::Benchmark {
+                id: format!("demo{k:04}"),
+                kind: Some(if k % 5 == 0 { "bench".into() } else { "session".into() }),
+                title: title.into(),
+                exe: exe.into(),
+                api: api.into(),
+                date: now_ms - k * 26_000_000,
+                seconds,
+                frames: (seconds * a as f64) as u64,
+                avg: a,
+                low1: a * 0.62,
+                low01: a * 0.45,
+                min_fps: a * 0.5,
+                max_fps: a * 1.4,
+                stutters: (k * 7 % 40) as u32,
+                hitches: (k % 4) as u32,
+                stability: 60.0 + (k * 13 % 38) as f32,
+                jitter_ms: 0.4 + (k % 9) as f32 * 0.2,
+                cpu: 20.0 + (k * 11 % 50) as f32,
+                gpu: 50.0 + (k * 17 % 49) as f32,
+                gpu_power: 90.0 + (k * 23 % 80) as f32,
+                cpu_temp_max: 60.0 + (k % 20) as f32,
+                gpu_temp_max: 65.0 + (k % 25) as f32,
+            });
+        }
+    }
+    out.sort_by(|a, b| b.date.cmp(&a.date));
+    out
+}
+
 fn chip(id: &str, driver: &str, label: &str, category: &str, readings: Vec<Reading>) -> Chip {
     Chip { id: id.into(), driver: driver.into(), label: label.into(), category: category.into(), readings }
 }

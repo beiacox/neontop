@@ -112,7 +112,11 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
     }
     stats.push(kit::stat("Chips", chips.len().to_string(), chips.iter().map(|c| c.driver.as_str()).collect::<Vec<_>>().join(", "), th.violet, None, cx).into_any_element());
 
-    let radar: Vec<(String, f32)> = temps.iter().map(|(c, r)| (format!("{} {}", c.label.trim_start_matches("NVMe "), r.label), ((r.value / limit(r)) * 100.0).min(100.0) as f32)).collect();
+    // rótulos cortos en el radar: primera palabra del chip + sensor ("NVMe Composite", "GPU edge")
+    let radar: Vec<(String, f32)> = temps
+        .iter()
+        .map(|(c, r)| (format!("{} {}", c.label.split_whitespace().next().unwrap_or(""), r.label), ((r.value / limit(r)) * 100.0).min(100.0) as f32))
+        .collect();
     let bars = div().flex().flex_col().gap(px(6.)).children(temps.iter().map(|(c, r)| {
         let lim = limit(r);
         kit::meter_row(format!("{} · {}", c.label, r.label), (r.value / lim) as f32, format!("{:.1}°C / {:.0}°", r.value, lim), th.temp_color(r.value as f32), cx)

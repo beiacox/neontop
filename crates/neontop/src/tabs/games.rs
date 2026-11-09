@@ -125,7 +125,8 @@ fn history(root: &Root, cx: &mut Context<Root>) -> impl IntoElement {
             .flex_col()
             .gap(px(2.))
             .p(px(8.))
-            .min_w(px(160.))
+            .w(px(210.))
+            .flex_shrink_0()
             .cursor_pointer()
             .border_1()
             .border_color(if on { th.cyan } else { th.border(th.cyan) })
@@ -136,7 +137,8 @@ fn history(root: &Root, cx: &mut Context<Root>) -> impl IntoElement {
                 cx.notify();
             }))
             .child(div().font_weight(FontWeight::BOLD).truncate().child(title))
-            .children(lines.into_iter().map(|l| kit::muted(l, cx)))
+            // una línea por dato, sin partir: las tarjetas tienen todas el mismo alto
+            .children(lines.into_iter().map(|l| kit::muted(l, cx).truncate()))
     };
     let cards = div()
         .flex()
@@ -273,6 +275,13 @@ fn fps_auto(root: &Root, cx: &mut Context<Root>) -> impl IntoElement {
         .gap(px(10.))
         .child(kit::toggle("fps-auto", enabled, "Añadir neontop-fps automáticamente a los juegos", cx, cx.listener(move |this, _, _, cx| {
             this.state.update(cx, |s, cx| {
+                if s.demo {
+                    if let Some(f) = &mut s.fps_auto {
+                        f.enabled = !enabled;
+                    }
+                    cx.notify();
+                    return;
+                }
                 let cfg = s.cfg.clone();
                 s.run_action(
                     cx,

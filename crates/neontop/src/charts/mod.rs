@@ -39,6 +39,15 @@ pub fn paint_text(window: &mut Window, cx: &mut App, s: &str, at: Point<Pixels>,
     f32::from(w)
 }
 
+/// Ancho de un texto con la fuente y el tamaño dados.
+pub fn text_width(window: &mut Window, s: &str, size: f32, family: &SharedString) -> f32 {
+    if s.is_empty() {
+        return 0.0;
+    }
+    let run = TextRun { len: s.len(), font: gpui::font(family.clone()), color: gpui::black(), background_color: None, underline: None, strikethrough: None };
+    f32::from(window.text_system().shape_line(SharedString::from(s.to_string()), px(size), &[run], None).width)
+}
+
 /// Recta poligonal (trazo) por los puntos dados.
 fn stroke(window: &mut Window, pts: &[Point<Pixels>], width: f32, color: Hsla, dashed: bool) {
     if pts.len() < 2 {
@@ -257,7 +266,10 @@ impl Plot {
     fn paint(self, b: Bounds<Pixels>, window: &mut Window, cx: &mut App) {
         let th = Th::get(cx).clone();
         let (max, ys) = self.prepare();
-        let (left, bottom, top, right) = if self.bare { (0.0, 0.0, 1.0, 0.0) } else { (44.0, 16.0, 6.0, 6.0) };
+        // el margen izquierdo se ajusta al rótulo más ancho del eje Y ("979.8 MiB")
+        let tick_vals = ticks(if self.lines.iter().any(|l| l.negate) { -max } else { self.y_min }, max, 4);
+        let label_w = if self.bare { 0.0 } else { tick_vals.iter().map(|v| text_width(window, &(self.y_fmt)(v.abs()), 9.5, &th.mono)).fold(0.0, f32::max) };
+        let (left, bottom, top, right) = if self.bare { (0.0, 0.0, 1.0, 0.0) } else { (label_w.max(20.0) + 12.0, 16.0, 6.0, 6.0) };
         let x0 = b.origin.x + px(left);
         let x1 = b.origin.x + b.size.width - px(right);
         let y0 = b.origin.y + px(top);
@@ -530,8 +542,11 @@ pub fn radar(axes: Vec<(String, f32)>, color: Hsla, height: f32) -> impl IntoEle
             }
             for (i, (label, _)) in axes.iter().enumerate() {
                 stroke(window, &[c, at(i, 1.0)], 1.0, fade(th.cyan, 0.12), false);
+                // el rótulo se mantiene dentro del lienzo aunque sea largo
                 let p = at(i, 1.16);
-                paint_text(window, cx, label, point(p.x, p.y - px(6.)), 10.0, th.muted, &th.mono, Align::Center);
+                let half = text_width(window, label, 10.0, &th.mono) / 2.0;
+                let x = f32::from(p.x).clamp(f32::from(b.origin.x) + half, f32::from(b.origin.x + b.size.width) - half);
+                paint_text(window, cx, label, point(px(x), p.y - px(6.)), 10.0, th.muted, &th.mono, Align::Center);
             }
             let mut poly: Vec<Point<Pixels>> = axes.iter().enumerate().map(|(i, (_, v))| at(i, (v / 100.0).clamp(0.0, 1.0))).collect();
             if poly.len() >= 3 {
@@ -601,13 +616,14 @@ pub fn columns(values: Vec<(String, f32, Hsla)>, max: f32, marks: Vec<f32>, fmt:
         |_, _, _| (),
         move |b, _, window, cx| {
             let th = Th::get(cx).clone();
-            let (left, bottom) = (44.0, 16.0);
+            let max = max.max(1e-6);
+            let left = ticks(0.0, max, 4).iter().map(|v| text_width(window, &fmt(*v), 9.5, &th.mono)).fold(0.0, f32::max).max(20.0) + 12.0;
+            let bottom = 16.0;
             let x0 = b.origin.x + px(left);
             let y1 = b.origin.y + b.size.height - px(bottom);
             let y0 = b.origin.y + px(6.);
             let w = f32::from(b.size.width) - left;
             let hgt = f32::from(y1 - y0);
-            let max = max.max(1e-6);
             for v in ticks(0.0, max, 4) {
                 let y = y1 - px(v / max * hgt);
                 window.paint_quad(fill(Bounds::new(point(x0, y), size(px(w), px(1.))), th.grid));
@@ -666,13 +682,14 @@ pub fn histogram(bins: Vec<(f32, Hsla)>, step: f32, unit: &'static str, height: 
         |_, _, _| (),
         move |b, _, window, cx| {
             let th = Th::get(cx).clone();
-            let (left, bottom) = (44.0, 16.0);
+            let max = bins.iter().map(|x| x.0).fold(1.0f32, f32::max);
+            let left = text_width(window, &crate::tabs::y_num(10f32.powi((max + 1.0).log10().ceil() as i32)), 9.5, &th.mono).max(20.0) + 12.0;
+            let bottom = 16.0;
             let x0 = b.origin.x + px(left);
             let y1 = b.origin.y + b.size.height - px(bottom);
             let y0 = b.origin.y + px(6.);
             let w = f32::from(b.size.width) - left;
             let hgt = f32::from(y1 - y0);
-            let max = bins.iter().map(|x| x.0).fold(1.0f32, f32::max);
             let lmax = (max + 1.0).log10().max(0.1);
             for k in 0..=(lmax.ceil() as i32) {
                 let v = 10f32.powi(k);

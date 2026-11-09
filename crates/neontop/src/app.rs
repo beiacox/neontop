@@ -56,6 +56,8 @@ pub struct Root {
     /// Procesos en la GPU ordenados por uso (si no, por memoria).
     pub gpu_sort_busy: bool,
     scroll: ScrollHandle,
+    /// Desplazamiento inicial (revisión visual), se aplica tras el primer dibujo.
+    pub qa_scroll: Option<f32>,
     _subs: Vec<Subscription>,
 }
 
@@ -77,6 +79,7 @@ impl Root {
             gpu_sel: 0,
             gpu_sort_busy: false,
             scroll: ScrollHandle::new(),
+            qa_scroll: None,
             _subs: subs,
         };
         r.sync_wants(cx);
@@ -121,7 +124,7 @@ impl Root {
         cx.notify();
     }
 
-    fn sidebar(&self, wide: bool, cx: &mut Context<Self>) -> impl IntoElement {
+    fn sidebar(&self, wide: bool, csd: bool, cx: &mut Context<Self>) -> impl IntoElement {
         let th = Th::get(cx).clone();
         let cur = self.tab(cx);
         let snap = self.state.read(cx).model.snap.clone();
@@ -180,24 +183,35 @@ impl Root {
                 .child(div().px(px(6.)).text_size(px(10.)).text_color(th.muted).font_family(th.mono.clone()).child(version))
                 .into_any_element()
         } else {
-            div()
+            // pestañas desplazables en horizontal; en ventanas estrechas los botones de ventana van
+            // a la derecha de esta barra (no en la cabecera)
+            let tabs = div()
                 .id("tabbar")
-                .w_full()
+                .flex_1()
+                .min_w_0()
                 .flex()
                 .items_center()
                 .gap(px(4.))
+                .overflow_x_scroll()
+                .child(div().pr(px(8.)).flex_shrink_0().child(logo))
+                .children(items);
+            div()
+                .w_full()
+                .flex()
+                .items_center()
+                .gap(px(6.))
                 .px(px(8.))
                 .py(px(6.))
-                .overflow_x_scroll()
                 .border_b_1()
                 .border_color(th.border(th.cyan))
-                .child(div().pr(px(8.)).flex_shrink_0().child(logo))
-                .children(items)
+                .child(tabs)
+                .when(csd, |d| d.child(window_controls(cx)))
                 .into_any_element()
         }
     }
 
-    fn header(&self, window: &mut Window, narrow: bool, cx: &mut Context<Self>) -> impl IntoElement {
+    /// `with_controls`: los botones de ventana van en la cabecera (con barra lateral); si no, en la barra de pestañas.
+    fn header(&self, window: &mut Window, narrow: bool, with_controls: bool, cx: &mut Context<Self>) -> impl IntoElement {
         let th = Th::get(cx).clone();
         let st = self.state.read(cx);
         let tab = st.ui.tab.clone();
@@ -284,7 +298,7 @@ impl Root {
                     .when(!narrow, |d| d.child(div().text_size(px(10.)).text_color(th.muted).font_family(th.mono.clone()).truncate().child(sub))),
             )
             .child(controls)
-            .when(csd, |d| d.child(window_controls(cx)))
+            .when(csd && with_controls, |d| d.child(window_controls(cx)))
     }
 
     fn toasts(&self, cx: &mut Context<Self>) -> impl IntoElement {
@@ -492,6 +506,15 @@ impl Render for Root {
             _ => tabs::overview::render(self, window, cx),
         };
         let ready = self.state.read(cx).model.samples > 0;
+        if ready && let Some(y) = self.qa_scroll {
+            // la altura del contenido se conoce tras dibujarlo: se reintenta hasta que cabe
+            self.scroll.set_offset(point(px(0.), px(-y)));
+            if f32::from(-self.scroll.offset().y) >= y - 1.0 {
+                self.qa_scroll = None;
+            } else {
+                cx.notify();
+            }
+        }
         let content = div()
             .id("content")
             .flex_1()
@@ -500,11 +523,12 @@ impl Render for Root {
             .track_scroll(&self.scroll)
             .p(px(if cols == 1 { 10. } else { 16. }))
             .child(if ready { body } else { kit::empty("INICIALIZANDO SENSORES…", cx).into_any_element() });
-        let main = div().flex_1().min_w_0().h_full().flex().flex_col().child(self.header(window, cols == 1, cx)).child(content);
+        let main = div().flex_1().min_w_0().h_full().flex().flex_col().child(self.header(window, cols == 1, wide, cx)).child(content);
+        let csd = matches!(window.window_decorations(), Decorations::Client { .. });
         let layout = if wide {
-            div().size_full().flex().child(self.sidebar(true, cx)).child(main)
+            div().size_full().flex().child(self.sidebar(true, csd, cx)).child(main)
         } else {
-            div().size_full().flex().flex_col().child(self.sidebar(false, cx)).child(main)
+            div().size_full().flex().flex_col().child(self.sidebar(false, csd, cx)).child(main)
         };
         let decorations = window.window_decorations();
         div()
@@ -581,9 +605,12 @@ pub fn show_main_window(cx: &mut App) {
         Ok(h) => {
             let _ = h.update(cx, |root, window, cx| {
                 window.activate_window();
-                // revisión visual: abrir Ajustes directamente
+                // revisión visual: abrir Ajustes directamente o bajar el contenido
                 if std::env::var_os("NEONTOP_QA_SETTINGS").is_some() {
                     root.open_settings(window, cx);
+                }
+                if let Some(y) = std::env::var("NEONTOP_QA_SCROLL").ok().and_then(|v| v.parse::<f32>().ok()) {
+                    root.qa_scroll = Some(y);
                 }
             });
         }

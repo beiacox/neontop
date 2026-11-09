@@ -181,7 +181,7 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
                 div()
                     .flex()
                     .gap(px(24.))
-                    .child(div().flex_1().flex().flex_col().gap(px(8.)).children(bars.into_iter().map(|(l, v, c, hint)| kit::meter_row(format!("{l} · {hint}"), (v / top) as f32, fmt::gbs(v, 1), c, cx))))
+                    .child(div().flex_1().flex().flex_col().gap(px(8.)).children(bars.into_iter().map(|(l, v, c, hint)| kit::meter_row_w(format!("{l} · {hint}"), 190., (v / top) as f32, fmt::gbs(v, 1), c, cx))))
                     .child(
                         div()
                             .w(px(170.))

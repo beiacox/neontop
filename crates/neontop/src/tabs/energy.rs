@@ -181,6 +181,7 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
                 Panel::new(format!("SAI · {}", u.model), scol).span(2).extra(kit::badge(stxt, scol)).child(
                     div()
                         .flex()
+                        .flex_wrap()
                         .gap(px(20.))
                         .child(
                             div()
@@ -193,6 +194,7 @@ pub fn render(root: &mut Root, _window: &mut Window, cx: &mut Context<Root>) -> 
                         .child(
                             div()
                                 .flex_1()
+                                .min_w(px(220.))
                                 .flex()
                                 .flex_col()
                                 .gap(px(4.))

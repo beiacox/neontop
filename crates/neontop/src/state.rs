@@ -243,6 +243,13 @@ impl AppState {
 
     /// Vuelve a leer el estado de la medición automática de FPS (lectura de ficheros: en segundo plano).
     pub fn refresh_fps_auto(&mut self, cx: &mut Context<Self>) {
+        // en la demostración no se leen ni tocan los lanzadores reales
+        if self.demo {
+            if self.fps_auto.is_none() {
+                self.fps_auto = Some(neontop_core::demo::fps_auto());
+            }
+            return;
+        }
         let cfg = self.cfg.clone();
         cx.spawn(async move |this, cx| {
             let st = cx.background_executor().spawn(async move { neontop_core::launchers::status(&cfg) }).await;
@@ -275,12 +282,16 @@ impl AppState {
 
 /// Crea el estado, arranca el muestreo (real o simulado) y la tarea que recibe las muestras.
 pub fn init(cx: &mut App, demo: bool) -> (Entity<AppState>, UnboundedSender<Msg>) {
-    let cfg = Arc::new(ConfigStore::load(neontop_core::paths::config_dir()));
+    // en la demostración la configuración solo vive en memoria: no toca la del usuario
+    let cfg = Arc::new(ConfigStore::load(if demo { None } else { neontop_core::paths::config_dir() }));
     let ui = cfg.get().ui;
     let ctl = Arc::new(Control::default());
     ctl.set_interval(ui.interval_ms);
     let (tx, rx) = unbounded::<Msg>();
-    let model = if demo { Model::new(neontop_core::demo::info(), false) } else { Model::for_this_machine(true) };
+    let mut model = if demo { Model::new(neontop_core::demo::info(), false) } else { Model::for_this_machine(true) };
+    if demo {
+        model.games.benchmarks = neontop_core::demo::history(neontop_core::format::now_ms());
+    }
     let web = crate::web::Web::new(cfg.clone(), ctl.clone(), tx.clone(), demo);
     let entity = cx.new(|_| AppState {
         model,
@@ -293,7 +304,9 @@ pub fn init(cx: &mut App, demo: bool) -> (Entity<AppState>, UnboundedSender<Msg>
         pending: false,
         wants: HashSet::new(),
         fps_auto: None,
-        membench: if demo { Vec::new() } else { neontop_core::paths::data_dir().map(|d| neontop_core::paths::read_json(&d.join("membench.json"))).unwrap_or_default() },
+        membench: if demo {
+            vec![MemBench { read: 41e9, write: 19e9, copy: 20e9, read_single: 27e9, latency_ns: 72.4, threads: 12, buffer_bytes: 512 << 20, duration_ms: 900.0, ts: neontop_core::format::now_ms() }]
+        } else { neontop_core::paths::data_dir().map(|d| neontop_core::paths::read_json(&d.join("membench.json"))).unwrap_or_default() },
         membench_running: false,
         notice: None,
         web: web.clone(),

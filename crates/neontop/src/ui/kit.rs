@@ -111,8 +111,10 @@ impl RenderOnce for Panel {
                     .truncate()
                     .child(th.title(&self.title)),
             );
+        // si lo de la derecha no cabe junto al título, pasa a la línea siguiente (el título no se pierde)
         let head = div()
             .flex()
+            .flex_wrap()
             .items_center()
             .justify_between()
             .gap(px(8.))
@@ -120,7 +122,7 @@ impl RenderOnce for Panel {
             .pt(px(10.))
             .pb(px(6.))
             .child(title)
-            .children(self.extra.map(|e| div().flex_shrink_0().text_size(px(10.5)).text_color(th.muted).font_family(th.mono.clone()).child(e)));
+            .children(self.extra.map(|e| div().max_w_full().overflow_hidden().whitespace_nowrap().text_size(px(10.5)).text_color(th.muted).font_family(th.mono.clone()).child(e)));
         let body = div().flex().flex_col().gap(px(8.)).flex_1().min_w_0().when(self.pad, |d| d.px(px(12.)).pb(px(12.))).children(self.children);
         p = p.child(head).child(body);
         if cut {
@@ -325,22 +327,50 @@ pub fn badge(s: impl Into<SharedString>, color: Hsla) -> impl IntoElement {
 
 /// Leyenda: punto de color + texto.
 pub fn legend(items: Vec<(String, Hsla)>) -> impl IntoElement {
-    div().flex().gap_x(px(10.)).children(
-        items.into_iter().map(|(s, c)| div().flex().items_center().gap(px(4.)).child(div().size(px(7.)).rounded(px(2.)).bg(c)).child(div().text_color(c).child(s))),
-    )
+    // una sola línea que nunca se parte (GPUI mide mal el alto de contenidos que se parten dentro de
+    // filas flexibles): si no cabe junto al título, el panel la pasa debajo y se recorta en el borde
+    div().flex().overflow_hidden().gap_x(px(10.)).children(items.into_iter().map(|(s, c)| {
+        div()
+            .flex()
+            .flex_shrink_0()
+            .items_center()
+            .gap(px(4.))
+            .child(div().flex_shrink_0().size(px(7.)).rounded(px(2.)).bg(c))
+            .child(div().whitespace_nowrap().text_color(c).child(s))
+    }))
 }
 
 /// Fila con medidor: etiqueta, barra y valor.
 pub fn meter_row(label: impl Into<SharedString>, frac: f32, value: impl Into<SharedString>, color: Hsla, cx: &App) -> impl IntoElement {
+    meter_row_w(label, 110., frac, value, color, cx)
+}
+
+/// Como `meter_row` con el ancho de la etiqueta a elegir (etiquetas largas).
+pub fn meter_row_w(label: impl Into<SharedString>, label_w: f32, frac: f32, value: impl Into<SharedString>, color: Hsla, cx: &App) -> impl IntoElement {
     let th = Th::get(cx).clone();
+    let label: SharedString = label.into();
     div()
         .flex()
         .items_center()
         .gap(px(8.))
         .text_size(px(11.))
-        .child(div().w(px(110.)).flex_shrink_0().truncate().text_color(th.muted).child(label.into()))
+        .child(div().id(SharedString::from(format!("mr-{label}"))).w(px(label_w)).flex_shrink_0().truncate().text_color(th.muted).tooltip(tooltip_text(label.clone())).child(label))
         .child(div().flex_1().child(charts::meter(frac, color, 6.)))
         .child(div().w(px(92.)).flex_shrink_0().flex().justify_end().font_family(th.mono.clone()).child(value.into()))
+}
+
+/// Texto emergente simple (para etiquetas recortadas).
+pub fn tooltip_text(text: SharedString) -> impl Fn(&mut Window, &mut App) -> gpui::AnyView {
+    move |_, cx| cx.new(|_| Tip(text.clone())).into()
+}
+
+struct Tip(SharedString);
+
+impl Render for Tip {
+    fn render(&mut self, _: &mut Window, cx: &mut gpui::Context<Self>) -> impl IntoElement {
+        let th = Th::get(cx);
+        div().px(px(8.)).py(px(4.)).bg(th.bg).border_1().border_color(th.cyan).rounded(px(4.)).text_size(px(11.)).text_color(th.text).child(self.0.clone())
+    }
 }
 
 /// Mensaje centrado para paneles sin datos.
