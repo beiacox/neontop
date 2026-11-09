@@ -60,7 +60,7 @@ impl Default for UiSettings {
             scanlines: true,
             glow: true,
             tab: "overview".into(),
-            close_to_tray: false,
+            close_to_tray: true,
             admin_actions: false,
             price: 0.15,
             currency: "$".into(),

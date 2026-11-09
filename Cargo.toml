@@ -1,6 +1,7 @@
 [workspace]
 resolver = "3"
 members = ["crates/*"]
+exclude = ["third_party"]
 
 [workspace.package]
 version = "0.14.0"
@@ -31,3 +32,7 @@ panic = "abort"
 # no vaya a tirones, y el crate propio en debug para compilar rápido.
 [profile.dev.package."*"]
 opt-level = 2
+
+# GPUI con un parche para seguir en la bandeja al cerrar la ventana (ver third_party/gpui/NEONTOP.md)
+[patch.crates-io]
+gpui = { path = "third_party/gpui" }

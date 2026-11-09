@@ -179,10 +179,11 @@ impl AppState {
                 self.pending = true;
                 self.flush(cx);
             }
-            Msg::Show => crate::app::show_main_window(cx),
+            Msg::Show => {}
             Msg::TogglePause => self.toggle_pause(cx),
             Msg::Quit => {
                 self.model.flush();
+                crate::single::cleanup();
                 cx.quit();
             }
         }
@@ -314,7 +315,12 @@ pub fn init(cx: &mut App, demo: bool) -> (Entity<AppState>, UnboundedSender<Msg>
 fn receive(cx: &mut App, entity: Entity<AppState>, mut rx: UnboundedReceiver<Msg>) {
     cx.spawn(async move |cx: &mut AsyncApp| {
         while let Some(msg) = rx.next().await {
-            if entity.update(cx, |s, cx| s.on_msg(msg, cx)).is_err() {
+            let r = match msg {
+                // abrir la ventana lee el estado: no puede hacerse dentro de su actualización
+                Msg::Show => cx.update(crate::app::show_main_window).map_err(|_| ()),
+                m => entity.update(cx, |s, cx| s.on_msg(m, cx)).map_err(|_| ()),
+            };
+            if r.is_err() {
                 break;
             }
         }

@@ -10,7 +10,8 @@ use futures::channel::mpsc::UnboundedSender;
 use crate::state::Msg;
 
 fn path() -> PathBuf {
-    neontop_core::paths::runtime_dir().join("neontop.sock")
+    // NEONTOP_SOCKET: otra ruta (pruebas con una segunda instancia aislada)
+    std::env::var_os("NEONTOP_SOCKET").map(PathBuf::from).unwrap_or_else(|| neontop_core::paths::runtime_dir().join("neontop.sock"))
 }
 
 /// Si ya hay una instancia, le pide mostrarse y devuelve `true` (esta debe terminar).
