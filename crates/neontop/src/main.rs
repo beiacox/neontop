@@ -37,8 +37,11 @@ fn main() {
     }
     let demo = args.iter().any(|a| a == "--demo");
     // una sola instancia (la demo puede convivir con la normal)
-    if !demo && single::notify_existing() {
+    if !demo && !single::claim() {
         return;
+    }
+    if !demo {
+        autostart::migrate_legacy();
     }
     let autostarted = args.iter().any(|a| a == autostart::ARG);
     let tab = arg_value(&args, "--tab");
